@@ -1,8 +1,8 @@
 { open Parser }
 
 rule token = parse
-  [' ' '\t' '\r' '\n'] { token lexbuf }
-| "//"          { single lexbuf } 
+  [' ' '\t' '\r'] { token lexbuf }
+| "//"          { single_comment lexbuf } 
 | "int"         { INT }
 | "string"      { STRING }
 | "file"        { FILE }
@@ -22,6 +22,7 @@ rule token = parse
 | '='           { ASSIGN }
 | '<'           { LT }
 | '>'           { GT }
+| '\n'          { NEWLINE }
 | "|>"          { PIPE }
 | "=="          { EQ }
 | "!="          { NEQ }
@@ -37,7 +38,10 @@ rule token = parse
 (* int *)
 | ['0'-'9']+ as int_lit { INT_LITERAL(int_of_string int_lit) }
 (* string *)
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as string_lit { STRING_LITERAL(int_of_string string_lit) }
+| '\''([^'\'']* as string_lit)'\'' { STRING_LITERAL(string_lit) }
+| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as id { VARIABLE(id) }
 | eof           { EOF }
 
-
+and single_comment = parse
+  '\n'          { token lexbuf }
+| _             { single_comment lexbuf }
