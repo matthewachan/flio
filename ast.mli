@@ -19,9 +19,11 @@ type expr =
 | Uop of uoperator * expr
 | IntLit of int
 | StringLit of string
+| ArrLit of expr list
 | Asn of string * expr
 | Id of string
 | FuncCall of string * expr list
+| ArrAccess of string * expr
 
 type stmt = 
   Block of stmt list

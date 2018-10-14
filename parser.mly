@@ -55,8 +55,12 @@ arglist:
 | arglist COMMA expr 	{ $3 :: $1 }
 
 vdecl_stmt:
-  typ ID SEQUENCING			{ VarDecl($1, $2) }
-| typ ID ASSIGNMENT expr SEQUENCING	{ VarDeclAsn($1, $2, $4) }
+  typ ID SEQUENCING				{ VarDecl($1, $2) }
+| typ ID ASSIGNMENT expr SEQUENCING		{ VarDeclAsn($1, $2, $4) }
+| typ ID ASSIGNMENT array_lit SEQUENCING 	{VarDeclAsn($1, $2, $4) }
+
+array_lit:
+  LBRACE args RBRACE	{ ArrLit($2) }
 
 stmt_list:
 			{ [] }
@@ -79,22 +83,26 @@ expr_opt:
 | expr		{ $1 }
 
 expr:
-  expr PLUS  expr		{ Binop($1, Add, $3) }
-| expr MINUS expr		{ Binop($1, Sub, $3) }
-| expr TIMES expr		{ Binop($1, Mul, $3) }
-| expr DIVIDE expr		{ Binop($1, Div, $3) }
-| expr LT  expr			{ Binop($1, Lt, $3) }
-| expr GT  expr			{ Binop($1, Gt, $3) }
-| expr EQ  expr			{ Binop($1, Eq, $3) }
-| expr NEQ  expr		{ Binop($1, Neq, $3) }
-| expr AND  expr		{ Binop($1, And, $3) }
-| expr OR  expr			{ Binop($1, Or, $3) }
-| NOT expr			{ Uop(Not, $2) }
-| ID ASSIGNMENT expr		{ Asn($1, $3) }
-| INTLIT			{ IntLit($1) }
-| STRINGLIT			{ StringLit($1) }
-| ID				{ Id($1) }
-| ID LPAREN args RPAREN	{ FuncCall($1, $3) }
+  expr PLUS  expr			{ Binop($1, Add, $3) }
+| expr MINUS expr			{ Binop($1, Sub, $3) }
+| expr TIMES expr			{ Binop($1, Mul, $3) }
+| expr DIVIDE expr			{ Binop($1, Div, $3) }
+| expr LT  expr				{ Binop($1, Lt, $3) }
+| expr GT  expr				{ Binop($1, Gt, $3) }
+| expr EQ  expr				{ Binop($1, Eq, $3) }
+| expr NEQ  expr			{ Binop($1, Neq, $3) }
+| expr AND  expr			{ Binop($1, And, $3) }
+| expr OR  expr				{ Binop($1, Or, $3) }
+| NOT expr				{ Uop(Not, $2) }
+| ID ASSIGNMENT expr			{ Asn($1, $3) }
+| ID ASSIGNMENT array_lit		{ Asn($1, $3) }
+| ID LBRACK expr RBRACK ASSIGNMENT expr	{ Asn($1, $3) }
+| INTLIT				{ IntLit($1) }
+| STRINGLIT				{ StringLit($1) }
+| ID					{ Id($1) }
+| ID LPAREN args RPAREN			{ FuncCall($1, $3) }
+| ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
+
 
 
 typ:
