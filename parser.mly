@@ -1,11 +1,12 @@
 %{ open Ast %}
 
-%token INT STRING
+%token INT STRING FILE DIR
 %token PLUS MINUS TIMES DIVIDE EOF ASSIGNMENT SEQUENCING GT LT EQ
 %token DEF RETURN
 %token FOR IF ELSE
 %token LBRACE RBRACE LPAREN RPAREN COMMA SEMI
-%token <int> LITERAL
+%token <int> INTLIT
+%token <string> STRINGLIT
 %token <string> ID
 
 %nonassoc NOELSE
@@ -61,9 +62,12 @@ expr:
 | expr GT  expr			{ Binop($1, Gt, $3) }
 | expr EQ  expr			{ Binop($1, Eq, $3) }
 | ID ASSIGNMENT expr		{ Asn($1, $3) }
-| LITERAL			{ Lit($1) }
+| INTLIT			{ IntLit($1) }
+| STRINGLIT			{ StringLit($1) }
 | ID				{ Id($1) }
 
 typ:
   INT		{ Int }
 | STRING	{ String }
+| FILE		{ File }
+| DIR		{ Dir }

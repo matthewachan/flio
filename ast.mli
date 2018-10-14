@@ -1,6 +1,6 @@
 type operator = Add | Sub | Mul | Div | Gt | Lt | Eq
 
-type typ = Int | String
+type typ = Int | String | File | Dir
 
 (* type vdecl = VarDecl of typ * string *)
 
@@ -8,7 +8,8 @@ type typ = Int | String
 type expr =
   Noexpr
 | Binop of expr * operator * expr
-| Lit of int
+| IntLit of int
+| StringLit of string
 | Asn of string * expr
 | Id of string
 
