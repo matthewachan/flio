@@ -1,6 +1,8 @@
 type operator = Add | Sub | Mul | Div | Gt | Lt | Eq
 
-type typ = Int | String | File | Dir
+type typ = Int | String | File | Dir | Array of typ * int
+
+
 
 (* type vdecl = VarDecl of typ * string *)
 

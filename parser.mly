@@ -4,7 +4,7 @@
 %token PLUS MINUS TIMES DIVIDE EOF ASSIGNMENT SEQUENCING GT LT EQ
 %token DEF RETURN
 %token FOR IF ELSE
-%token LBRACE RBRACE LPAREN RPAREN COMMA SEMI
+%token LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA
 %token <int> INTLIT
 %token <string> STRINGLIT
 %token <string> ID
@@ -66,8 +66,11 @@ expr:
 | STRINGLIT			{ StringLit($1) }
 | ID				{ Id($1) }
 
+
+
 typ:
   INT		{ Int }
 | STRING	{ String }
 | FILE		{ File }
 | DIR		{ Dir }
+| typ LBRACK INTLIT RBRACK { Array($1, $3) }
