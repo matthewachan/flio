@@ -25,7 +25,11 @@ rule token = parse
 | '>'		{ GT }
 | '<'		{ LT }
 | "=="		{ EQ }
+| "!="		{ NEQ }
+| "and"		{ AND }
+| "or"		{ OR }
 | '='		{ ASSIGNMENT }
+| "not"		{ NOT }
 | ';'		{ SEQUENCING } 
 | ['0'-'9']+ as lit 					{ INTLIT(int_of_string lit) }
 | '\''([^'\'']* as string_lit)'\'' 			{ STRINGLIT(string_lit) }

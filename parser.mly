@@ -1,10 +1,11 @@
 %{ open Ast %}
 
 %token INT STRING FILE DIR
-%token PLUS MINUS TIMES DIVIDE EOF ASSIGNMENT SEQUENCING GT LT EQ
+%token PLUS MINUS TIMES DIVIDE ASSIGNMENT 
+%token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
 %token FOR IF ELSE
-%token LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA
+%token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token <int> INTLIT
 %token <string> STRINGLIT
 %token <string> ID
@@ -12,10 +13,13 @@
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGNMENT
+%left OR
+%left AND
 %left SEQUENCING
-%left LT GT EQ
+%left LT GT EQ NEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
+%right NOT NEG
 
 %start program
 %type <Ast.program> program
@@ -61,6 +65,10 @@ expr:
 | expr LT  expr			{ Binop($1, Lt, $3) }
 | expr GT  expr			{ Binop($1, Gt, $3) }
 | expr EQ  expr			{ Binop($1, Eq, $3) }
+| expr NEQ  expr		{ Binop($1, Neq, $3) }
+| expr AND  expr		{ Binop($1, And, $3) }
+| expr OR  expr			{ Binop($1, Or, $3) }
+| NOT expr			{ Uop(Not, $2) }
 | ID ASSIGNMENT expr		{ Asn($1, $3) }
 | INTLIT			{ IntLit($1) }
 | STRINGLIT			{ StringLit($1) }

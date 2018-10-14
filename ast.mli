@@ -1,4 +1,7 @@
-type operator = Add | Sub | Mul | Div | Gt | Lt | Eq
+type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
+
+type uoperator = Neg | Not
+
 
 type typ = Int | String | File | Dir | Array of typ * int
 
@@ -10,6 +13,7 @@ type typ = Int | String | File | Dir | Array of typ * int
 type expr =
   Noexpr
 | Binop of expr * operator * expr
+| Uop of uoperator * expr
 | IntLit of int
 | StringLit of string
 | Asn of string * expr
