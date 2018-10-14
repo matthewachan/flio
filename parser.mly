@@ -3,11 +3,13 @@
 %token INT STRING
 %token PLUS MINUS TIMES DIVIDE EOF ASSIGNMENT SEQUENCING GT LT EQ
 %token DEF RETURN
-%token FOR
+%token FOR IF ELSE
 %token LBRACE RBRACE LPAREN RPAREN COMMA SEMI
 %token <int> LITERAL
 %token <string> ID
 
+%nonassoc NOELSE
+%nonassoc ELSE
 %right ASSIGNMENT
 %left SEQUENCING
 %left LT GT EQ
@@ -42,6 +44,9 @@ stmt:
 | RETURN expr									{ Return($2) }
 | LBRACE stmt_list RBRACE							{ Block(List.rev $2) }
 | FOR LPAREN expr_opt SEQUENCING expr_opt SEQUENCING expr_opt RPAREN stmt 	{ For($3, $5, $7, $9) }
+| IF LPAREN expr RPAREN stmt %prec NOELSE					{ If($3, $5, Block([])) }
+| IF LPAREN expr RPAREN stmt ELSE stmt 						{ If($3, $5, $7) }
+
 
 expr_opt:
 		{ Noexpr }
