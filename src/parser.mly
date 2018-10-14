@@ -5,7 +5,7 @@
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
 %token DOT
-%token FOR FOREACH IN IF ELSE
+%token FOR FOREACH IN IF ELIF ELSE
 %token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token <int> INTLIT
 %token <string> STRINGLIT
@@ -13,6 +13,7 @@
 
 %nonassoc NOELSE
 %nonassoc ELSE
+%nonassoc ELIF
 %right ASSIGNMENT
 %left OR
 %left AND
@@ -86,6 +87,15 @@ stmt:
 | FOREACH expr IN expr stmt							{ Foreach($2, $4, $5) }
 | IF LPAREN expr RPAREN stmt %prec NOELSE					{ If($3, $5, Block([])) }
 | IF LPAREN expr RPAREN stmt ELSE stmt 						{ If($3, $5, $7) }
+| IF LPAREN expr RPAREN stmt elif_list %prec NOELSE 				{ Elif(($3 :: (List.rev(fst $6))), (List.rev((Block([]) :: (List.rev ($5 :: (List.rev (snd $6)))))))) }  
+| IF LPAREN expr RPAREN stmt elif_list ELSE stmt 				{ Elif(($3 :: (List.rev(fst $6))), (List.rev(($8 :: (List.rev ($5 :: (List.rev (snd $6)))))))) }
+
+elif_list:
+  elif			{ ([fst $1], [snd $1]) }
+| elif_list elif	{ (fst $2 :: fst $1, snd $2 :: snd $1) }
+
+elif:
+  ELIF LPAREN expr RPAREN stmt	{ ($3, $5) }
 
 /* Expressions */
 expr_opt:

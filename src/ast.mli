@@ -30,6 +30,7 @@ type stmt =
 | For of  expr * expr * expr * stmt
 | Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
+| Elif of expr list * stmt list
 
 (* Funcs have a type, name, argument list, and body of statements *)
 type fdecl = {

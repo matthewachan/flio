@@ -12,6 +12,7 @@ rule token = parse
 | "foreach"	{ FOREACH }
 | "in"		{ IN }
 | "if"		{ IF }
+| "elif"	{ ELIF }
 | "else"	{ ELSE }
 | "//"		{ comment lexbuf }
 | '('		{ LPAREN }
