@@ -115,6 +115,7 @@ expr:
 | expr AND  expr			{ Binop($1, And, $3) }
 | expr OR  expr				{ Binop($1, Or, $3) }
 | NOT expr				{ Uop(Not, $2) }
+/*| MINUS expr %prec NEG			{ Uop(Neg, $2) }*/
 | expr DOT ID				{ Field($1, $3) }
 | ID ASSIGNMENT expr			{ Asn($1, $3) }
 | ID ASSIGNMENT array_lit		{ Asn($1, $3) }
