@@ -3,7 +3,7 @@ type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
 type uoperator = Neg | Not
 
 
-type typ = Int | String | File | Dir | Array of typ * int
+type typ = Int | String | File | Dir | Array of typ * int | Void
 
 
 

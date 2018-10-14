@@ -13,6 +13,7 @@ rule token = parse
 | "in"		{ IN }
 | "if"		{ IF }
 | "else"	{ ELSE }
+| "//"		{ comment lexbuf }
 | '('		{ LPAREN }
 | ')'		{ RPAREN }
 | '{'		{ LBRACE }
@@ -37,3 +38,6 @@ rule token = parse
 | '\''([^'\'']* as string_lit)'\'' 			{ STRINGLIT(string_lit) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as id { ID(id) }
 | eof 		{ EOF }
+and comment = parse
+  '\n'	{ token lexbuf }
+| _	{ comment lexbuf }	

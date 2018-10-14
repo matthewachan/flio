@@ -36,7 +36,7 @@ decls:
 | decls stmt	{ {funcs = $1.funcs; stmts = ($2 :: $1.stmts)} }
 
 fdecl:
-  DEF ID LPAREN params RPAREN typ LBRACE stmt_list RBRACE	{ {typ = $6; fname = $2; params = $4; body = List.rev $8} }
+  DEF ID LPAREN params RPAREN typ_opt LBRACE stmt_list RBRACE	{ {typ = $6; fname = $2; params = $4; body = List.rev $8} }
 
 params:
   		{ [] }
@@ -103,7 +103,9 @@ expr:
 | ID LPAREN args RPAREN			{ FuncCall($1, $3) }
 | ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
 
-
+typ_opt:
+	{ Void }
+| typ	{ $1 }
 
 typ:
   INT		{ Int }
