@@ -21,6 +21,7 @@ rule token = parse
 | '['		{ LBRACK }
 | ']'		{ RBRACK }
 | ','		{ COMMA }
+| '.'		{ DOT }
 | '+'		{ PLUS }
 | '-'		{ MINUS }
 | '*'		{ TIMES }

@@ -4,6 +4,7 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGNMENT 
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
+%token DOT
 %token FOR FOREACH IN IF ELSE
 %token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token <int> INTLIT
@@ -20,6 +21,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right NOT NEG
+%left DOT
 
 %start program
 %type <Ast.program> program
@@ -54,10 +56,11 @@ arglist:
   expr			{ [$1] }
 | arglist COMMA expr 	{ $3 :: $1 }
 
+
 vdecl_stmt:
   typ ID SEQUENCING				{ VarDecl($1, $2) }
 | typ ID ASSIGNMENT expr SEQUENCING		{ VarDeclAsn($1, $2, $4) }
-| typ ID ASSIGNMENT array_lit SEQUENCING 	{VarDeclAsn($1, $2, $4) }
+| typ ID ASSIGNMENT array_lit SEQUENCING 	{ VarDeclAsn($1, $2, $4) }
 
 array_lit:
   LBRACE args RBRACE	{ ArrLit($2) }
@@ -94,6 +97,7 @@ expr:
 | expr AND  expr			{ Binop($1, And, $3) }
 | expr OR  expr				{ Binop($1, Or, $3) }
 | NOT expr				{ Uop(Not, $2) }
+| expr DOT ID				{ Field($1, $3) }
 | ID ASSIGNMENT expr			{ Asn($1, $3) }
 | ID ASSIGNMENT array_lit		{ Asn($1, $3) }
 | ID LBRACK expr RBRACK ASSIGNMENT expr	{ Asn($1, $3) }

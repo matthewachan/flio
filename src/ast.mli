@@ -24,6 +24,7 @@ type expr =
 | Id of string
 | FuncCall of string * expr list
 | ArrAccess of string * expr
+| Field of expr * string
 
 type stmt = 
   Block of stmt list
