@@ -1,13 +1,8 @@
-type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
+type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or | Pipe
 
 type uoperator = Neg | Not
 
-
 type typ = Int | String | File | Dir | Array of typ * int | Void
-
-
-
-(* type vdecl = VarDecl of typ * string *)
 
 (* Statements can be expressions or local var declarations *)
 type param = Parameter of typ * string
