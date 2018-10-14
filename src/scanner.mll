@@ -1,3 +1,8 @@
+(*
+  scanner.mll
+  Author: Matthew Chan
+*)
+
 { open Parser }
 
 rule token = parse

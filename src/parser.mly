@@ -1,3 +1,8 @@
+/*
+  parser.mly
+  Author: Matthew Chan
+*/
+
 %{ open Ast %}
 
 %token INT STRING FILE DIR

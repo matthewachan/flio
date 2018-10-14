@@ -1,3 +1,8 @@
+(*
+  ast.mli
+  Author: Matthew Chan
+*)
+
 type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or | Pipe
 
 type uoperator = Neg | Not
