@@ -46,6 +46,13 @@ paramlist:
   typ ID 			{ [Parameter($1, $2)] }
 | paramlist COMMA typ ID 	{ Parameter($3, $4) :: $1}
 
+args:
+		{ [] }
+| arglist	{ List.rev $1 }
+
+arglist:
+  expr			{ [$1] }
+| arglist COMMA expr 	{ $3 :: $1 }
 
 vdecl_stmt:
   typ ID SEQUENCING			{ VarDecl($1, $2) }
@@ -87,7 +94,7 @@ expr:
 | INTLIT			{ IntLit($1) }
 | STRINGLIT			{ StringLit($1) }
 | ID				{ Id($1) }
-
+| ID LPAREN args RPAREN	{ FuncCall($1, $3) }
 
 
 typ:

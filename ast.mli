@@ -9,6 +9,9 @@ type typ = Int | String | File | Dir | Array of typ * int
 
 (* type vdecl = VarDecl of typ * string *)
 
+(* Statements can be expressions or local var declarations *)
+type param = Parameter of typ * string
+
 (* Expressions are assignment and basic operations *)
 type expr =
   Noexpr
@@ -18,9 +21,7 @@ type expr =
 | StringLit of string
 | Asn of string * expr
 | Id of string
-
-(* Statements can be expressions or local var declarations *)
-type param = Parameter of typ * string
+| FuncCall of string * expr list
 
 type stmt = 
   Block of stmt list
