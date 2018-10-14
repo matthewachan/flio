@@ -31,8 +31,20 @@ program:
   decls EOF { $1 }
 
 decls:
- 		{ {stmts = []} }
-| decls stmt	{ {stmts = ($2 :: $1.stmts)} }
+ 		{ {funcs = []; stmts = []} }
+| decls fdecl	{ {funcs = ($2 :: $1.funcs); stmts = $1.stmts} }
+| decls stmt	{ {funcs = $1.funcs; stmts = ($2 :: $1.stmts)} }
+
+fdecl:
+  DEF ID LPAREN params RPAREN typ LBRACE stmt_list RBRACE	{ {typ = $6; fname = $2; params = $4; body = List.rev $8} }
+
+params:
+  		{ [] }
+| paramlist	{ List.rev $1 }
+
+paramlist:
+  typ ID 			{ [Parameter($1, $2)] }
+| paramlist COMMA typ ID 	{ Parameter($3, $4) :: $1}
 
 
 vdecl_stmt:
@@ -46,7 +58,8 @@ stmt_list:
 stmt:
   expr SEQUENCING								{ Expr($1) }
 | vdecl_stmt									{ $1 }
-| RETURN expr									{ Return($2) }
+| RETURN expr SEQUENCING							{ Return($2) }
+| RETURN SEQUENCING								{ Return(Noexpr) }
 | LBRACE stmt_list RBRACE							{ Block(List.rev $2) }
 | FOR LPAREN expr_opt SEQUENCING expr_opt SEQUENCING expr_opt RPAREN stmt 	{ For($3, $5, $7, $9) }
 | FOREACH expr IN expr stmt							{ Foreach($2, $4, $5) }

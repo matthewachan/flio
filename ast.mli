@@ -19,9 +19,9 @@ type expr =
 | Asn of string * expr
 | Id of string
 
-(* Statements can be expressions or local var declarations 
-type formal = Formal of typ * string
-*)
+(* Statements can be expressions or local var declarations *)
+type param = Parameter of typ * string
+
 type stmt = 
   Block of stmt list
 | Expr of expr
@@ -32,15 +32,16 @@ type stmt =
 | Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
 
-(* Funcs have a type, name, argument list, and body of statements 
+(* Funcs have a type, name, argument list, and body of statements *)
 type fdecl = {
 	typ: typ;
 	fname: string;
-	formals: formal list;
+	params: param list;
 	body: stmt list;
 }
-*)
+
 (* Program is composed of functions and statements *)
 type program = {
+	funcs: fdecl list;
 	stmts: stmt list;
 }
