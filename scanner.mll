@@ -9,6 +9,8 @@ rule token = parse
 | "def"		{ DEF }
 | "return"	{ RETURN }
 | "for"		{ FOR }
+| "foreach"	{ FOREACH }
+| "in"		{ IN }
 | "if"		{ IF }
 | "else"	{ ELSE }
 | '('		{ LPAREN }

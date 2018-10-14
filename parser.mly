@@ -4,7 +4,7 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGNMENT 
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
-%token FOR IF ELSE
+%token FOR FOREACH IN IF ELSE
 %token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token <int> INTLIT
 %token <string> STRINGLIT
@@ -49,6 +49,7 @@ stmt:
 | RETURN expr									{ Return($2) }
 | LBRACE stmt_list RBRACE							{ Block(List.rev $2) }
 | FOR LPAREN expr_opt SEQUENCING expr_opt SEQUENCING expr_opt RPAREN stmt 	{ For($3, $5, $7, $9) }
+| FOREACH expr IN expr stmt							{ Foreach($2, $4, $5) }
 | IF LPAREN expr RPAREN stmt %prec NOELSE					{ If($3, $5, Block([])) }
 | IF LPAREN expr RPAREN stmt ELSE stmt 						{ If($3, $5, $7) }
 

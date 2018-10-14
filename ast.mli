@@ -29,6 +29,7 @@ type stmt =
 | VarDeclAsn of typ * string * expr
 | Return of expr
 | For of  expr * expr * expr * stmt
+| Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
 
 (* Funcs have a type, name, argument list, and body of statements 
