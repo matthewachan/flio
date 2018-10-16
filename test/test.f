@@ -1,6 +1,11 @@
 // test.f
 // Author: Matthew Chan
 
+// IMPORT TESTS
+
+import 'mypackage'
+import 'anotherpackage'
+
 // FUNCTION TESTS 
 def sum (int a, int b) int { 
 	return a + b;
@@ -15,7 +20,7 @@ def get_hello() {
 
 // FOR LOOP AND CONDITIONAL TESTS
 int a;
-for (a = 0; a < 10; a = a + 1) {
+for (a = 0; a < 10; a = a + 1;) {
 	get_hello();
 	if (a == 5)
 		print('Halfway there!');
