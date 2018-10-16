@@ -3,7 +3,7 @@
 # OBJS = parser.cmo scanner.cmo flio.cmo
 TARFILES = Makefile scanner.mll parser.mly ast.mli
 
-OBJS = parser.cmo scanner.cmo
+OBJS = parser.cmo scanner.cmo flio.cmo
 
 flio : $(OBJS)
 	ocamlc -o flio $(OBJS)

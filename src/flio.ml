@@ -1,12 +1,13 @@
 (*
-  flio.ml
+  flio.
   Author: Matthew Chan
 *)
 
 open Ast
 
 let _ =
-  let lexbuf = Lexing.from_channel stdin in
+let _ = print_endline "running flio" in
+ let lexbuf = Lexing.from_channel stdin in
   try
     let _p = Parser.program Scanner.token lexbuf in
     print_endline "Parsing OK - Valid program."
