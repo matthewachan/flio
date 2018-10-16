@@ -23,7 +23,7 @@ type expr =
 | Id of string
 | FuncCall of string * expr list
 | ArrAccess of string * expr
-| Field of expr * string
+| Field of string * string
 
 type stmt = 
   Nostmt
