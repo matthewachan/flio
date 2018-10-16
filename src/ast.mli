@@ -20,19 +20,20 @@ type expr =
 | IntLit of int
 | StringLit of string
 | ArrLit of expr list
-| Asn of string * expr
 | Id of string
 | FuncCall of string * expr list
 | ArrAccess of string * expr
 | Field of expr * string
 
 type stmt = 
-  Block of stmt list
+  Nostmt
+| Block of stmt list
 | Expr of expr
 | VarDecl of typ * string
 | VarDeclAsn of typ * string * expr
+| Asn of string * expr
 | Return of expr
-| For of  expr * expr * expr * stmt
+| For of  stmt * expr * stmt * stmt
 | Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
 | Elif of expr list * stmt list

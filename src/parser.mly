@@ -82,13 +82,20 @@ stmt_list:
 			{ [] }
 | stmt_list stmt 	{ $2 :: $1 }
 
+stmt_opt:
+  SEQUENCING		{ Nostmt }
+| stmt			{ $1 }
+
 stmt:
   expr SEQUENCING								{ Expr($1) }
 | vdecl_stmt									{ $1 }
+| ID ASSIGNMENT expr SEQUENCING							{ Asn($1, $3) }
+| ID ASSIGNMENT array_lit SEQUENCING						{ Asn($1, $3) }
+| ID LBRACK expr RBRACK ASSIGNMENT expr	SEQUENCING				{ Asn($1, $3) }
 | RETURN expr SEQUENCING							{ Return($2) }
 | RETURN SEQUENCING								{ Return(Noexpr) }
 | LBRACE stmt_list RBRACE							{ Block(List.rev $2) }
-| FOR LPAREN expr_opt SEQUENCING expr_opt SEQUENCING expr_opt RPAREN stmt 	{ For($3, $5, $7, $9) }
+| FOR LPAREN stmt_opt expr_opt SEQUENCING stmt_opt RPAREN stmt 			{ For($3, $4, $6, $8) }
 | FOREACH expr IN expr stmt							{ Foreach($2, $4, $5) }
 | IF LPAREN expr RPAREN stmt %prec NOELSE					{ If($3, $5, Block([])) }
 | IF LPAREN expr RPAREN stmt ELSE stmt 						{ If($3, $5, $7) }
@@ -122,14 +129,12 @@ expr:
 | NOT expr				{ Uop(Not, $2) }
 /*| MINUS expr %prec NEG			{ Uop(Neg, $2) }*/
 | expr DOT ID				{ Field($1, $3) }
-| ID ASSIGNMENT expr			{ Asn($1, $3) }
-| ID ASSIGNMENT array_lit		{ Asn($1, $3) }
-| ID LBRACK expr RBRACK ASSIGNMENT expr	{ Asn($1, $3) }
 | INTLIT				{ IntLit($1) }
 | STRINGLIT				{ StringLit($1) }
 | ID					{ Id($1) }
 | ID LPAREN args RPAREN			{ FuncCall($1, $3) }
 | ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
+
 
 /* Types */
 typ_opt:
