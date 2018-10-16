@@ -63,13 +63,6 @@ paramlist:
 | paramlist COMMA typ ID 	{ Parameter($3, $4) :: $1}
 
 
-/* Variable declaration / definition */
-vdecl_stmt:
-  typ ID SEQUENCING				{ VarDecl($1, $2) }
-| typ ID ASSIGNMENT expr SEQUENCING		{ VarDeclAsn($1, $2, $4) }
-| typ ID ASSIGNMENT array_lit SEQUENCING 	{ VarDeclAsn($1, $2, $4) }
-
-
 /* Arrays */
 array_lit:
   LBRACE args RBRACE	{ ArrLit($2) }
@@ -83,6 +76,16 @@ arglist:
 | arglist COMMA expr 	{ $3 :: $1 }
 
 /* Statements */
+vdecl_stmt:
+  typ ID SEQUENCING				{ VarDecl($1, $2) }
+| typ ID ASSIGNMENT expr SEQUENCING		{ VarDeclAsn($1, $2, $4) }
+| typ ID ASSIGNMENT array_lit SEQUENCING 	{ VarDeclAsn($1, $2, $4) }
+
+pipe_stmt:
+  expr PIPE expr SEQUENCING			{ Binop($1, Pipe, $3) }
+| expr PIPE pipe_stmt				{ Binop($1, Pipe, $3) }
+
+
 stmt_list:
 			{ [] }
 | stmt_list stmt 	{ $2 :: $1 }
@@ -94,6 +97,7 @@ stmt_opt:
 stmt:
   expr SEQUENCING								{ Expr($1) }
 | vdecl_stmt									{ $1 }
+| pipe_stmt									{ PipeStmt($1) }
 | ID ASSIGNMENT expr SEQUENCING							{ Asn($1, $3) }
 | ID ASSIGNMENT array_lit SEQUENCING						{ Asn($1, $3) }
 | ID LBRACK expr RBRACK ASSIGNMENT expr	SEQUENCING				{ Asn($1, $3) }
@@ -124,7 +128,6 @@ expr:
 | expr MINUS expr			{ Binop($1, Sub, $3) }
 | expr TIMES expr			{ Binop($1, Mul, $3) }
 | expr DIVIDE expr			{ Binop($1, Div, $3) }
-| expr PIPE expr			{ Binop($1, Pipe, $3) }
 | expr LT  expr				{ Binop($1, Lt, $3) }
 | expr GT  expr				{ Binop($1, Gt, $3) }
 | expr EQ  expr				{ Binop($1, Eq, $3) }
@@ -138,9 +141,7 @@ expr:
 | ID					{ Id($1) }
 | ID LPAREN args RPAREN			{ FuncCall($1, $3) }
 | ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
-
 /*| MINUS expr %prec NEG			{ Uop(Neg, $2) }*/
-
 
 
 /* Types */

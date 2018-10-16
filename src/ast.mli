@@ -33,6 +33,7 @@ type stmt =
 | VarDeclAsn of typ * string * expr
 | Asn of string * expr
 | Return of expr
+| PipeStmt of expr
 | For of  stmt * expr * stmt * stmt
 | Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
