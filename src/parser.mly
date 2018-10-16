@@ -10,6 +10,7 @@
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
 %token DOT
+%token IMPORT
 %token FOR FOREACH IN IF ELIF ELSE
 %token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token <int> INTLIT
@@ -40,10 +41,14 @@ program:
   decls EOF { $1 }
 
 decls:
- 		{ {funcs = []; stmts = []} }
-| decls fdecl	{ {funcs = ($2 :: $1.funcs); stmts = $1.stmts} }
-| decls stmt	{ {funcs = $1.funcs; stmts = ($2 :: $1.stmts)} }
+ 		{ {imports = []; funcs = []; stmts = []} }
+| decls import	{ {imports = ($2 :: $1.imports); funcs = $1.funcs; stmts = $1.stmts} }
+| decls fdecl	{ {imports = $1.imports; funcs = ($2 :: $1.funcs); stmts = $1.stmts} }
+| decls stmt	{ {imports = $1.imports; funcs = $1.funcs; stmts = ($2 :: $1.stmts)} }
 
+/* Imports */
+import:
+  IMPORT STRINGLIT	{ Import($2) }
 
 /* Function declaration / definition */
 fdecl:
@@ -127,13 +132,15 @@ expr:
 | expr AND  expr			{ Binop($1, And, $3) }
 | expr OR  expr				{ Binop($1, Or, $3) }
 | NOT expr				{ Uop(Not, $2) }
-/*| MINUS expr %prec NEG			{ Uop(Neg, $2) }*/
 | expr DOT ID				{ Field($1, $3) }
 | INTLIT				{ IntLit($1) }
 | STRINGLIT				{ StringLit($1) }
 | ID					{ Id($1) }
 | ID LPAREN args RPAREN			{ FuncCall($1, $3) }
 | ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
+
+/*| MINUS expr %prec NEG			{ Uop(Neg, $2) }*/
+
 
 
 /* Types */

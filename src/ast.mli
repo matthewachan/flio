@@ -38,6 +38,9 @@ type stmt =
 | If of expr * stmt * stmt
 | Elif of expr list * stmt list
 
+type import =
+  Import of string
+
 (* Funcs have a type, name, argument list, and body of statements *)
 type fdecl = {
 	typ: typ;
@@ -50,4 +53,5 @@ type fdecl = {
 type program = {
 	funcs: fdecl list;
 	stmts: stmt list;
+	imports: import list;
 }
