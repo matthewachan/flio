@@ -42,7 +42,7 @@ type stmt =
 type import =
   Import of string
 
-(* Funcs have a type, name, argument list, and body of statements *)
+(* Functions have a return type, name, argument list, and body of statements *)
 type fdecl = {
 	typ: typ;
 	fname: string;
@@ -50,7 +50,7 @@ type fdecl = {
 	body: stmt list;
 }
 
-(* Program is composed of functions and statements *)
+(* Program is composed of functions, statements and imports *)
 type program = {
 	funcs: fdecl list;
 	stmts: stmt list;

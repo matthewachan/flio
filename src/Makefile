@@ -1,7 +1,7 @@
-# TARFILES = Makefile scanner.mll parser.mly ast.mli flio.ml
+# TARFILES = Makefile scanner.mll parser.mly ast.ml flio.ml
 
 # OBJS = parser.cmo scanner.cmo flio.cmo
-TARFILES = Makefile scanner.mll parser.mly ast.mli
+TARFILES = Makefile scanner.mll parser.mly ast.mli sast.ml
 
 OBJS = parser.cmo scanner.cmo flio.cmo
 
