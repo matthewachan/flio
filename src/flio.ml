@@ -9,8 +9,8 @@ let _ =
 let _ = print_endline "running flio" in
  let lexbuf = Lexing.from_channel stdin in
   try
-    let _p = Parser.program Scanner.token lexbuf in
-    print_endline "Parsing OK - Valid program."
+    let ast = Parser.program Scanner.token lexbuf in
+    Semant.check ast
   with e ->
     print_endline "Parsing failed - Invalid program."
 (*
