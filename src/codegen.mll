@@ -1,5 +1,5 @@
 module L = Llvm
-module A = Ast
+module S = Sast
 
 module StringMap = Map.Make(String)
 
@@ -15,12 +15,12 @@ let translate(globals, functions) =
         let dir_type = L.struct_type context [|str_ptr_t; array_ptr_t; array_ptr_t|] in       
 
         let ltype_of_type = function
-                A.Int -> i32_t
-              | A.String -> str_ptr_t
-              | A.Void -> void_t
-              | A.File -> file_type
-              | A.Dir -> dir_type
-              | A.Array -> array_ptr_t in
+                S.Int -> i32_t
+              | S.String -> str_ptr_t
+              | S.Void -> void_t
+              | S.File -> file_type
+              | S.Dir -> dir_type
+              | S.Array -> array_ptr_t in
         let global_vars : L.llvalue StringMap.t =
                 let global_var m (t, n) =
                         let init = L.const_int (ltype_of_typ t) 0
@@ -71,4 +71,14 @@ let translate(globals, functions) =
           in
 
           let rec expr builder ((_, e) : sexpr) = match e with
+                S.SNoexpr -> L.const_int i32_t 0
+              | S.SIntLit i -> L.const_int i32_t i
+              | S.SStringLit -> L.build_global_stringptr s "string" builder 
+              | S.SArrLit
+              | S.SId
+              | S.SFuncCall
+              | S.SArrAccess
+              | S.SField
+              | S.SBinop
+              | S.SUop
 
