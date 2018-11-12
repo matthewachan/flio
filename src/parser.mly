@@ -39,7 +39,7 @@
 
 /* { funcs: [<fdecl>]; stmts: [<stmt>] } */
 program:
-  decls EOF { $1 }
+        decls EOF { {imports = $1.imports; funcs = $1.funcs; stmts = List.rev $1.stmts} }
 
 decls:
  		{ {imports = []; funcs = []; stmts = []} }
