@@ -1,0 +1,2 @@
+dir f = dopen("c\mydoc\");
+rmdir(dir);
