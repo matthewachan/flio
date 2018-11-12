@@ -45,6 +45,75 @@ let check ast =
        with Not_found -> raise (Failure ("unrecognized function " ^ s))
   in
 
+  let check_stmt s =
+
+    (* Type of each variable (global, formal, or local *)
+    let symbols = StringMap.empty
+
+    in
+
+    let type_of_identifier s map =
+      try
+        StringMap.find s map 
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    let rec expr map = function
+        IntLit _ -> Int
+      | StringLit _ -> String
+      | ArrLit a -> 
+          Array(expr map (List.hd a), List.length a)
+      | Id s -> type_of_identifier s map
+      | Noexpr -> Void
+      | ArrAccess(n, idx) -> type_of_identifier n map
+      | FuncCall(f, args) -> let fd = function_decl f in 
+          if List.length args != List.length fd.params then
+            raise (Failure ("Mismatched number of arguments"))
+          else
+           List.iter2 (fun (ft, _) e -> let et = expr map e in
+              ignore (check_assign ft et (Failure ("Illegal argument")))
+           ) fd.params args;
+           fd.typ
+      | Binop(e1, op, e2) as e -> let t1 = expr map e1 and t2 = expr map e2 in
+        (match op with
+          Add | Sub | Mul | Div when t1 = Int && t2 = Int -> Int
+        | Eq | Neq when t1 = t2 -> Int
+        | Lt | Gt when t1 = Int && t2 = Int -> Int
+        | And | Or when t1 = Int && t2 = Int -> Int
+        (* @TODO: Type of pipe? *)
+        | _ -> raise (Failure ("illegal binary operator " ))
+        (* ^ *)
+        (*       string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^ *)
+        (*       string_of_typ t2 ^ " in " ^ string_of_expr e)) *)
+        )
+    
+    in 
+    let check_bool_expr map e = if expr map e != Int
+     then raise (Failure ("expected Boolean expression in " ))
+     (* ^ string_of_expr e)) *)
+     else ()
+    in
+    (* Verify a statement or throw an exception *)
+    let rec stmt map = function
+      Block sl -> let rec check_block m = function
+          [Return _ as s] -> stmt m s
+        | Return _ :: _ -> raise (Failure "nothing may follow a return")
+        | Block sl :: ss -> check_block m (sl @ ss)
+        | s :: ss -> check_block (stmt m s) ss
+        | [] -> m
+        in check_block map sl
+      | VarDecl(t, n) as var -> (StringMap.add n t map)
+      | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
+      | Asn(n, e) -> let lt = type_of_identifier n map in map
+      | Expr e -> ignore(expr map e) ; map
+      | Return e -> raise (Failure ("Returns not allowed outside of function scope"))
+      | For(s1, e, s2, s3) -> ignore(stmt (stmt (stmt map s1) s2) s3) ; map
+      | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
+
+
+    in
+    ignore(stmt symbols (Block s))
+  in
 
   let check_function func =
 
@@ -127,4 +196,4 @@ let check ast =
     in
     ignore(stmt symbols (Block func.body))
 
-  in List.iter check_function ast.funcs
+  in List.iter check_function ast.funcs ; check_stmt ast.stmts
