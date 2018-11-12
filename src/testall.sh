@@ -22,7 +22,7 @@ globalerror=0
 keep=0
 
 Usage() {
-    echo "Usage: testall.sh [options] [.tape files]"
+    echo "Usage: testall.sh [options] [.flio files]"
     echo "-k    Keep intermediate files"
     echo "-h    Print this help"
     exit 1
@@ -104,8 +104,8 @@ Check() {
 CheckFail() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.tape//'`
-    reffile=`echo $1 | sed 's/.tape$//'`
+                             s/.flio//'`
+    reffile=`echo $1 | sed 's/.flio$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -116,7 +116,7 @@ CheckFail() {
     generatedfiles=""
 
     generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
-    RunFail "$TAPE" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
+    RunFail "$FLIO" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
     Compare ${basename}.err ${reffile}.err ${basename}.diff
 
     # Report the status and clean up the generated files
@@ -159,7 +159,7 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="tests/test-*.tape tests/fail-*.tape"
+    files="tests/test-*.flio tests/fail-*.flio"
 fi
 
 for file in $files
