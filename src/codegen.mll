@@ -120,10 +120,64 @@ let translate(globals, functions) =
               | None -> ignore (f builder) in
             
       let rec stmt builder = function
-        S.SNostmt -> _
-        S.SBlock sl -> List.fold_left stmt builder sl
-        S.SExpr expr -> ignore(expr builder e); builder
-        S.SVarDecl (t, id) -> builder
-        S.SVarDeclAsn (t, id, e) -> ignore(stmt builder(S.Asn(id, e))); builder
-        S.Asn(id, e) -> let e' = expr builder e in ignore(L.build_store e' (lookup s) builder; e'
-        S.              
+         S.SNostmt -> _
+      |  S.SBlock sl -> List.fold_left stmt builder sl
+      |  S.SExpr expr -> ignore(expr builder e); builder
+      |  S.SVarDecl (t, id) -> builder
+      |  S.SVarDeclAsn (t, id, e) -> ignore(stmt builder(S.Asn(id, e))); builder
+      |  S.SAsn(id, e) -> let e' = expr builder e in ignore(L.build_store e' (lookup s) builder; e'
+      |  S.SReturn e -> ignore(match fdecl.styp with
+                        S.Void -> L.build_ret_void builder
+                      | _ -> L.build_ret (expr builder e) builder;
+                      builder
+      |  S.SPipeStmt -> _
+      |  S.SFor(e1, e2, e3, body) -> let loop predicate body = 
+                let pred_bb = L.append_block context "while" the function in
+                ignore(L.build_br pred_bb builder);
+
+                let body_bb = L.append)block context "while_body" the_function in
+                add_terminal (stmt (L.builder_at_end context body_bb) body) ) (L.build_br pred_bb);
+
+                let pred_builder = L.builder_at_end context pred_bb in
+                let bool_val = expr pred_builder predicate in
+
+                let merge_bb = L.append_block context "merge" the function in
+                ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
+                L.builder_at_end context merge_bb 
+
+        in stmt builder
+                (S.SBlock [S.SExpr e1 ;
+                        loop (e2, S.SBlock [body ; 
+                                                A.Expr e3]) ] )
+       |  S.SForeach -> _
+       |  S.SIf (predicate, then_stmt, else_stmt) ->
+                 let bool_val = expr builder predicate in
+                 let merge_bb = L.append_block context
+                                "merge" the_function in
+                 let b_br_merge = L.build_br merge_bb in
+
+                 let then_bb = L.append_block context "then" the_function in
+
+                 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+                 b_br_merge;
+
+                 let else_bb = L.append_block context "else" the_function in
+
+                 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+                 b_br_merge;
+                 
+                 ignore(L.build_con_br bool_val then_bb else_bb builder);
+
+                 L.builder_at_end context merge_bb 
+        |  S.SElif -> _ 
+        in 
+
+        let builder = stmt builder (SBlock fdecl.sbody) in
+
+        add_terminal builder (match fdecl.styp with 
+                A.Void -> L.build_return_void
+              | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
+        in
+        List.iter build_function_body functions;
+        the_module 
+
