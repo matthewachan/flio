@@ -66,8 +66,6 @@ let check ast =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
-    (* let get_binds map = function *)
-    (*   VarDecl(t, n) as var -> *)
     let rec expr map = function
         IntLit _ -> Int
       | StringLit _ -> String
@@ -116,55 +114,17 @@ let check ast =
       | VarDecl(t, n) as var -> (StringMap.add n t map)
       | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
       | Asn(n, e) -> let lt = type_of_identifier n map in map
-      | Return e -> map
+      | Expr e -> ignore(expr map e) ; map
+      | Return e -> let t = expr map e in
+        if 
+          t = func.typ then map
+        else
+          raise (Failure ("Return type mismatch"))
       | For(s1, e, s2, s3) -> ignore(stmt (stmt (stmt map s1) s2) s3) ; map
       | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
 
-    (* | Expr e -> ignore (expr e) *)
-    (* | Return e -> let t = expr e in if t = func.typ then () else *)
-      (* raise (Failure ("return gives " ) *)
-      (* (1* ^ string_of_typ t ^ " expected " ^ *1) *)
-      (* (1*                  string_of_typ func.typ ^ " in " ^ string_of_expr e)) *1) *)
-
-    (* | If(p, b1, b2) -> check_bool_expr p; stmt b1; stmt b2 *)
-    (* | For(e1, e2, e3, st) -> ignore (expr e1); check_bool_expr e2; *)
-                             (* ignore (expr e3); stmt st *)
 
     in
     ignore(stmt symbols (Block func.body))
-
-    (*   | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in *)
-    (*     (match op with *)
-    (*       Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int *)
-    (*     | Eq | Neq when t1 = t2 -> Int *)
-    (*     | Lt | Gt when t1 = Int && t2 = Int -> Int *)
-    (*     | And | Or when t1 = Int && t2 = Int -> Int *)
-    (*     (1* @TODO: Type of pipe? *1) *)
-    (*     | _ -> raise (Failure ("illegal binary operator " ) *)
-    (*     (1* ^ *1) *)
-    (*     (1*       string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^ *1) *)
-    (*     (1*       string_of_typ t2 ^ " in " ^ string_of_expr e)) *1) *)
-    (*     ) *)
-    (*   | Unop(op, e) as ex -> let t = expr e in *)
-    (*     (match op with *)
-    (*       Neg when t = Int -> Int *)
-    (*     | Not when t = Int -> Int *) 
-    (*     | _ -> raise (Failure ("illegal unary operator " ) *)
-    (*     (1* ^ string_of_uop op ^ *1) *)
-    (*     (1*        string_of_typ t ^ " in " ^ string_of_expr ex))) *1) *)
-    (*   | Noexpr -> Void *)
-    (*   | FuncCall(fname, actuals) as call -> let fd = function_decl fname in *)
-    (*   if List.length actuals != List.length fd.formals then *)
-    (*     raise (Failure ("expecting " ^ string_of_int *)
-    (*       (List.length fd.formals) ^ " arguments in " ^ string_of_expr call)) *)
-    (*   (1* else *1) *)
-    (*   (1*   List.iter2 (fun (ft, _) e -> let et = expr e in *1) *)
-    (*   (1*   ignore (check_assign ft et *1) *)
-    (*   (1*     (Failure ("illegal actual argument found " ^ string_of_typ et ^ *1) *)
-    (*   (1*     " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e)))) *1) *)
-    (* (1* fd.formals actuals; *1) *)
-    (*     fd.typ *)
-    (* in *)
-
 
   in List.iter check_function ast.funcs
