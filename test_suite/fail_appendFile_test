@@ -3,6 +3,6 @@
     File y;
     File z;
     x = fopen("c\mydoc\dict.txt"); 
-    y = fopen("c\mydoc\lol.py");
+    y = "you are appending a file with a string";
     z = appendFile(x,y);
     print(z);	

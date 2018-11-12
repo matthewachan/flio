@@ -1,8 +1,3 @@
-file f  = fopen("c\mydoc\llm.txt");
-
-
-
-file f  = fopen("c\mydoc\llm.txt");
-
-
-
+String y = "how ya doin");
+file f  = fopen(y);
+print("you are trying to open a string");

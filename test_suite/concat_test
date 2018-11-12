@@ -1,0 +1,4 @@
+string x = "you";
+string y = "are a legend!";
+concat(x,y);
+
