@@ -1,0 +1,3 @@
+String lol = "is plt tough?";
+file gidron = fopen("c\mydoc\plt.txt");
+write(gidron, lol);
