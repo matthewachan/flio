@@ -10,7 +10,7 @@ type uoperator = Neg | Not
 type typ = Int | String | File | Dir | Array of typ * int | Void
 
 (* Statements can be expressions or local var declarations *)
-type param = Parameter of typ * string
+type param = typ * string
 
 (* Expressions are assignment and basic operations *)
 type expr =
@@ -58,55 +58,55 @@ type program = {
 }
 
 (* Pretty printing functions *)
-let string_of_op = function
-  Add -> "+"
-| Sub -> "-"
-| Mul -> "*"
-| Div -> "/"
-| Eq -> "=="
-| Neq -> "!="
-| Lt -> "<"
-| Gt -> ">"
-| And -> "and"
-| Or -> "or"
-| Pipe -> "|>"
+(* let string_of_op = function *)
+(*   Add -> "+" *)
+(* | Sub -> "-" *)
+(* | Mul -> "*" *)
+(* | Div -> "/" *)
+(* | Eq -> "==" *)
+(* | Neq -> "!=" *)
+(* | Lt -> "<" *)
+(* | Gt -> ">" *)
+(* | And -> "and" *)
+(* | Or -> "or" *)
+(* | Pipe -> "|>" *)
 
-let string_of_uop = function
-  Neg -> "-"
-| Not -> "!"
+(* let string_of_uop = function *)
+(*   Neg -> "-" *)
+(* | Not -> "!" *)
 
-let rec string_of_typ = function
-  Int -> "int"
-| Void -> "void"
-| String -> "string"
-| File -> "file"
-| Dir -> "dir"
-| Array(t, size) -> let t1 = string_of_typ t
-	in t1 ^ "[" ^ size ^ "]"
+(* let rec string_of_typ = function *)
+(*   Int -> "int" *)
+(* | Void -> "void" *)
+(* | String -> "string" *)
+(* | File -> "file" *)
+(* | Dir -> "dir" *)
+(* | Array(t, size) -> let t1 = string_of_typ t *)
+(* 	in t1 ^ "[" ^ size ^ "]" *)
 
-let rec string_of_expr = function
-  IntLit(l) -> string_of_int l
-| StringLit(l) -> string_of_float l
-| Id(s) -> s
-| Binop(e1, op, e2) -> let lhs = string_of_expr e1 and rhs = string_of_expr e2 in
-	(lhs ^ " " ^ string_of_op op ^ " " ^ rhs)
-| Unop(op, e) -> string_of_uop op ^ string_of_expr e
-| ArrLit(e) -> "{" ^ String.concat ", " (List.map string_of_expr e) ^ "}"
-| ArrAccesss(id, e) -> let idx = string_of_expr e in
-	(id ^ "[" ^ idx ^ "]")
-| Field(id, field) -> id ^ "." ^ field
-| FuncCall(f, args) -> f ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
-| Noexpr -> ""
+(* let rec string_of_expr = function *)
+(*   IntLit(l) -> string_of_int l *)
+(* | StringLit(l) -> string_of_float l *)
+(* | Id(s) -> s *)
+(* | Binop(e1, op, e2) -> let lhs = string_of_expr e1 and rhs = string_of_expr e2 in *)
+(* 	(lhs ^ " " ^ string_of_op op ^ " " ^ rhs) *)
+(* | Unop(op, e) -> string_of_uop op ^ string_of_expr e *)
+(* | ArrLit(e) -> "{" ^ String.concat ", " (List.map string_of_expr e) ^ "}" *)
+(* | ArrAccesss(id, e) -> let idx = string_of_expr e in *)
+(* 	(id ^ "[" ^ idx ^ "]") *)
+(* | Field(id, field) -> id ^ "." ^ field *)
+(* | FuncCall(f, args) -> f ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")" *)
+(* | Noexpr -> "" *)
 
-let rec string_of_stmt = function
-  Block(stmts) ->
-	"{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-| Expr(expr) -> string_of_expr expr ^ ";\n";
-| VarDecl(t, id) -> (string_of_type t) ^ " " ^ id ^ ";\n"
-| VarDeclAsn(t, id, e) -> (string_of_type t) ^ " " ^ id ^ " = " ^ (string_of_expr e) ^ ";\n"
-| Asn(id, e) -> id ^ " = " ^ (string_of_expr e) ^ ";\n"
-| Return(expr) -> "return " ^ string_of_expr expr ^ ";\n"
-| PipeStmt(expr) -> string_of_expr expr ^ ";\n"
+(* let rec string_of_stmt = function *)
+(*   Block(stmts) -> *)
+(* 	"{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n" *)
+(* | Expr(expr) -> string_of_expr expr ^ ";\n"; *)
+(* | VarDecl(t, id) -> (string_of_type t) ^ " " ^ id ^ ";\n" *)
+(* | VarDeclAsn(t, id, e) -> (string_of_type t) ^ " " ^ id ^ " = " ^ (string_of_expr e) ^ ";\n" *)
+(* | Asn(id, e) -> id ^ " = " ^ (string_of_expr e) ^ ";\n" *)
+(* | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n" *)
+(* | PipeStmt(expr) -> string_of_expr expr ^ ";\n" *)
 (*
 | For of  stmt * expr * stmt * stmt
 | Foreach of expr * expr * stmt

@@ -60,8 +60,8 @@ params:
 | paramlist	{ List.rev $1 }
 
 paramlist:
-  typ ID 			{ [Parameter($1, $2)] }
-| paramlist COMMA typ ID 	{ Parameter($3, $4) :: $1}
+  typ ID 			{ [($1, $2)] }
+| paramlist COMMA typ ID 	{ ($3, $4) :: $1}
 
 
 /* Arrays */

@@ -12,7 +12,8 @@ let _ = print_endline "running flio" in
     let ast = Parser.program Scanner.token lexbuf in
     Semant.check ast
   with e ->
-    print_endline "Parsing failed - Invalid program."
+          print_endline "Parsing failed - Invalid program.";
+    raise e
 (*
     let _err_msg = Printexc.to_string e
     and _trace = Printexc.get_backtrace () in
