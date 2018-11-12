@@ -1,0 +1,4 @@
+file f  = fopen("c\mydoc\llm.txt");
+
+
+

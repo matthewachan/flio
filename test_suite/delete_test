@@ -1,0 +1,3 @@
+
+file x = fopen("/Users/gideonrono/Desktop/Screen Shot 2018-10-13 at 14.17.15.png");
+delete(x);
