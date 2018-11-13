@@ -34,6 +34,7 @@ type sstmt =
 (* Functions have a return type, name, argument list, and body of statements *)
 type sfdecl = {
 	styp: typ;
+        slocals: param list;
 	sfname: string;
 	sparams: param list;
 	sbody: sstmt list;
