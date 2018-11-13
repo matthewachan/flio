@@ -106,8 +106,8 @@ vdecl_stmt:
 | typ ID ASSIGNMENT array_lit SEQUENCING 	{ VarDeclAsn($1, $2, $4) }
 
 pipe_stmt:
-  expr PIPE expr SEQUENCING			{ Binop($1, Pipe, $3) }
-| expr PIPE pipe_stmt				{ Binop($1, Pipe, $3) }
+    expr PIPE expr SEQUENCING			{ $1 :: [$3] }
+| expr PIPE pipe_stmt				{ $1 :: $3 }
 
 asn_stmt:
   ID ASSIGNMENT expr SEQUENCING							{ Asn($1, $3) }

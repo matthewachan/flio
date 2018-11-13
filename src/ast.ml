@@ -1,6 +1,7 @@
 (*
-  ast.mli
+  ast.ml
   Author: Matthew Chan
+  Author: Justin Gross
 *)
 
 type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
@@ -46,7 +47,7 @@ type import =
 type fdecl = {
 	typ: typ;
 	fname: string;
-(*        locals: param list;*)
+(*        locals: param list; *)
 	params: param list;
 	body: stmt list;
 }
@@ -58,7 +59,7 @@ type program = {
 	imports: import list;
 }
 
-(* Pretty printing functions 
+(* Pretty printing functions *)
  let string_of_op = function 
    Add -> "+" 
  | Sub -> "-" 
@@ -83,7 +84,7 @@ type program = {
  | File -> "file" 
  | Dir -> "dir" 
  | Array(t, size) -> let t1 = string_of_typ t 
- 	in t1 ^ "[" ^ size ^ "]" 
+ 	in t1 ^ "[" ^ string_of_int size ^ "]" 
 
  let rec string_of_expr = function 
    IntLit(l) -> string_of_int l 
@@ -91,29 +92,28 @@ type program = {
  | Id(s) -> s 
  | Binop(e1, op, e2) -> let lhs = string_of_expr e1 and rhs = string_of_expr e2 in 
  	(lhs ^ " " ^ string_of_op op ^ " " ^ rhs) 
- | Unop(op, e) -> string_of_uop op ^ string_of_expr e 
+ | Uop(op, e) -> string_of_uop op ^ string_of_expr e 
  | ArrLit(e) -> "{" ^ String.concat ", " (List.map string_of_expr e) ^ "}" 
- | ArrAccesss(id, e) -> let idx = string_of_expr e in 
+ | ArrAccess(id, e) -> let idx = string_of_expr e in 
  	(id ^ "[" ^ idx ^ "]") 
  | Field(id, field) -> id ^ "." ^ field 
  | FuncCall(f, args) -> f ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")" 
  | Noexpr -> "" 
 
+(* Everything complete except for Elif statement with Else  I believe the code below that is commented out works, but I'm not sure*)
 
- (*Where is array assignment?  Not in ast either.  Pipe statement needs ast to be changed as well.  Not sure if these for statement works.  Elif needs aan else statment*)
  let rec string_of_stmt = function 
    Block(stmts) -> 
  	"{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n" 
  | Expr(expr) -> string_of_expr expr ^ ";\n"; 
- | VarDecl(t, id) -> (string_of_type t) ^ " " ^ id ^ ";\n" 
- | VarDeclAsn(t, id, e) -> (string_of_type t) ^ " " ^ id ^ " = " ^ (string_of_expr e) ^ ";\n" 
+ | VarDecl(t, id) -> (string_of_typ t) ^ " " ^ id ^ ";\n" 
+ | VarDeclAsn(t, id, e) -> (string_of_typ t) ^ " " ^ id ^ " = " ^ (string_of_expr e) ^ ";\n" 
  | Asn(id, e) -> id ^ " = " ^ (string_of_expr e) ^ ";\n" 
  | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n" 
  | PipeStmt(exprs) -> String.concat " |> " (List.map string_of_expr exprs) ^ ";\n" 
  | Foreach(elem, lst, stmt) -> "foreach " ^ string_of_expr elem ^ " in " ^ string_of_expr lst ^ string_of_stmt stmt
-
-
-
+ | For(s1, e, s2, s3) -> "for (" ^ string_of_stmt s1 ^ " " ^ string_of_expr e ^ " ; " ^
+         string_of_stmt s2 ^ ") " ^ string_of_stmt s3
 
 
 | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
@@ -123,27 +123,11 @@ type program = {
 	string_of_stmt (List.hd stmts)
 	^ String.concat "" (List.map2 (fun e s -> "elif (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s) (List.tl exprs) (List.tl (List.rev 		(List.tl (List.rev stmts))))) 
 	^ "else\n" ^ string_of_stmt (List.hd (List.rev stmts))
-(*| For(e1, e2, e3, s) ->
-	"for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
-	string_of_expr e3  ^ ") " ^ string_of_stmt s *)
-| Nostmt -> ""
-
-
-
-(* type stmt = 
-  Nostmt
-| Block of stmt list
-| Expr of expr
-| VarDecl of typ * string
-| VarDeclAsn of typ * string * expr
-| Asn of string * expr
-| Return of expr
-| PipeStmt of expr
-| For of  stmt * expr * stmt * stmt
-| Foreach of expr * expr * stmt
-| If of expr * stmt * stmt
-| Elif of expr list * stmt list
+(*| Elif(exprs, stmts) ->  "if (" ^ string_of_expr (List.hd exprs) ^ ")\n" ^
+	string_of_stmt (List.hd stmts)
+	^ String.concat "" (List.map2 (fun e s -> "elif (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s) (List.tl exprs) (List.tl stmts))
 *)
+| Nostmt -> ""
 
  let string_of_import = function
     Import(util)-> "import " ^ util 
@@ -160,4 +144,4 @@ let string_of_program (imports, funcs, stmts) =
   String.concat "\n" (List.map string_of_import imports) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs) ^ "\n" ^
   String.concat "\n" (List.map string_of_stmt stmts) 
- *) 
+ 
