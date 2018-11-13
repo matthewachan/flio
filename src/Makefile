@@ -3,7 +3,7 @@ all : filo.native
 
 .PHONY : filo.native
 filo.native :
-	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w, +a-4 \
+	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		filo.native
 .PHONY: clean
 clean:
