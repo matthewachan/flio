@@ -57,7 +57,7 @@ type program = {
 	imports: import list;
 }
 
- Pretty printing functions 
+(* Pretty printing functions 
  let string_of_op = function 
    Add -> "+" 
  | Sub -> "-" 
@@ -159,4 +159,4 @@ let string_of_program (imports, funcs, stmts) =
   String.concat "\n" (List.map string_of_import imports) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs) ^ "\n" ^
   String.concat "\n" (List.map string_of_stmt stmts) 
-  
+ *) 
