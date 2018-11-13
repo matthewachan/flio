@@ -46,7 +46,7 @@ type import =
 type fdecl = {
 	typ: typ;
 	fname: string;
-(*        locals: param list;*)
+        locals: param list;
 	params: param list;
 	body: stmt list;
 }
