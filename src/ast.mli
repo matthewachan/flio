@@ -46,7 +46,6 @@ type import =
 type fdecl = {
 	typ: typ;
 	fname: string;
-        locals: param list;
 	params: param list;
 	body: stmt list;
 }
@@ -169,14 +168,11 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 let string_of_program (imports, funcs, stmts) =
   String.concat "\n" (List.map string_of_import imports) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs) ^ "\n" ^
   String.concat "\n" (List.map string_of_stmt stmts) 
- *) 
+
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
