@@ -29,8 +29,8 @@ type stmt =
   Nostmt
 | Block of stmt list
 | Expr of expr
-| VarDecl of typ * string
-| VarDeclAsn of typ * string * expr
+| VarDecl of param
+| VarDeclAsn of param * expr
 | Asn of string * expr
 | Return of expr
 | PipeStmt of expr
@@ -49,6 +49,8 @@ type fdecl = {
 	params: param list;
 	body: stmt list;
 }
+
+type items  = Stmt of stmt |  Function of fdecl 
 
 (* Program is composed of functions, statements and imports *)
 type program = {

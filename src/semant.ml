@@ -102,8 +102,8 @@ let check ast =
         | s :: ss -> check_block (stmt m s) ss
         | [] -> m
         in check_block map sl
-      | VarDecl(t, n) as var -> (StringMap.add n t map)
-      | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
+      | VarDecl(t) as var -> (StringMap.add (fst(t) snd(t)) map)
+      | VarDeclAsn(t, e) -> (StringMap.add (fst(t) snd(t)) map)
       | Asn(n, e) -> let lt = type_of_identifier n map in map
       | Expr e -> ignore(expr map e) ; map
       | Return e -> raise (Failure ("Returns not allowed outside of function scope"))
