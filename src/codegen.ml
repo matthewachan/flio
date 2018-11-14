@@ -37,18 +37,18 @@ let translate(program) =
 
         let globals = 
            let global_list = List.filter (fun x -> match x with 
-              A.VarDecl(x) -> true
-            | A.VarDeclAsn(x,_) -> true
+              A.VarDecl(x, _) -> true
+            | A.VarDeclAsn(x,_, _) -> true
             | _ -> false) statements
            in List.map (fun x -> match x with
-              A.VarDecl(x) -> x
-            |  A.VarDeclAsn(x, _) -> x
+              A.VarDecl(x, x1) -> (x, x1)
+            |  A.VarDeclAsn(x,x1, _) -> (x, x1)
             | _ -> failwith ("couldn't determine globals")) global_list
          
          in
 
         let not_globals = List.filter (fun x -> match x with
-            A.VarDecl(x) -> false
+            A.VarDecl(x, _) -> false
            | _ -> true) statements in
 
          let functions = 
@@ -113,7 +113,6 @@ let translate(program) =
               | A.ArrLit e -> L.const_int i32_t 0
               | A.Id s -> L.build_load (lookup s) s builder
               | A.ArrAccess (id, sexpr) -> L.const_int i32_t 0
-              | A.Field (id, field) -> L.const_int i32_t 0
               | A.FuncCall ("print", [e]) -> L.build_call printf_func [| str_format_str ; (expr builder e) |] "printf" builder
               | A.FuncCall(f, args) -> 
                 let (fdef, fdecl) = StringMap.find f function_decls in
@@ -153,13 +152,12 @@ let translate(program) =
       |  A.Block sl -> List.fold_left stmt builder sl
       |  A.Expr (e) -> ignore (expr builder e); builder
       |  A.VarDecl (t, id) -> builder
-      |  A.VarDeclAsn (id, e) -> (*ignore (stmt builder(A.Asn(id, e)));*) builder
+      |  A.VarDeclAsn (id, e, typ) -> (*ignore (stmt builder(A.Asn(id, e)));*) builder
       |  A.Asn(id, e) -> (*let e' = expr builder e in ignore(L.build_store e' (lookup s)); e'*) builder
       |  A.Return (expr) -> (*ignore (match fdecl.styp with
                         A.Void -> L.build_ret_void builder
                       | _ -> L.build_ret (expr builder e) builder);*)
                       builder
-      |  A.PipeStmt (s) -> builder
       |  A.For(e1, e2, e3, body) -> (*let loop predicate body = 
                 let pred_bb = L.append_block context "while" the_function in
                 ignore(L.build_br pred_bb builder);

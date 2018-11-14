@@ -132,4 +132,4 @@ let string_of_import import = "import " ^ import
 let string_of_program program =
   String.concat "\n" (List.map string_of_import program.imports) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl program.funcs) ^ "\n" ^
-  String.concat "\n" (List.map string_of_stmt program.stmts) 
+  String.concat "\n" (List.map string_of_stmt program.stmts)
