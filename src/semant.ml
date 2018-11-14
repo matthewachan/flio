@@ -1,5 +1,4 @@
 open Ast
-open Sast
 
 module StringMap = Map.Make (String)
 
@@ -36,10 +35,14 @@ let check ast =
         report_duplicate (fun n -> "duplicate function " ^ n)
         (List.map (fun fd -> fd.fname) ast.funcs);
 
+        let built_in_decls =  StringMap.add "print"
+                { typ = Void; fname = "print"; params = [(Int, "x")];
+                body = [] } 
+        in
+     
         (* Keep track of function declarations *)
-
         let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-        StringMap.empty ast.funcs 
+        built_in_decls ast.funcs 
         in
 
         let function_decl s = try StringMap.find s function_decls
@@ -66,7 +69,7 @@ let check ast =
                         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex))
                         )
-                | ArrAccess(n, idx) -> type_of_identifier n map
+                | ArrAccess(n, _) -> type_of_identifier n map
                 | FuncCall(f, args) as call -> let fd = function_decl f in 
                         if List.length args != List.length fd.params then
                                 raise (Failure ("expecting " ^ string_of_int
@@ -113,16 +116,16 @@ let check ast =
                                 | [] -> m
                                 in check_block map sl
                         | VarDecl(t, n) -> (StringMap.add n t map)
-                        | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
+                        | VarDeclAsn(t, n ,e) -> ignore(expr map e); (StringMap.add n t map)
                         | Asn(n, e) as ex -> let lt = type_of_identifier n map and rt = expr map e in 
                                 ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
                                 " = " ^ string_of_typ rt ^ " in " ^ string_of_stmt ex))) ; map
                         | Expr e -> ignore(expr map e) ; map
-                        | Return e -> raise (Failure ("returns not allowed outside of function scope"))
-                        | For(s1, e, s2, s3) -> ignore(stmt (stmt (stmt map s1) s2) s3) ; map
+                        | Return e -> ignore(expr map e) ; raise (Failure ("returns not allowed outside of function scope"))
+                        | For(s1, e, s2, s3) -> ignore(expr map e); ignore(stmt (stmt (stmt map s1) s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                        | Foreach(e1, e2, s) -> ignore(stmt map s); map
+                        | Foreach(_, e, s) -> ignore(expr map e); ignore(stmt map s); map
                         | Elif(exprs, stmts) -> let check_e e = ignore(expr map e) and check_s s = ignore(stmt map s) in
                                 List.iter check_e exprs; List.iter check_s stmts; map
                 in ignore(stmt symbols (Block s))
@@ -155,7 +158,7 @@ let check ast =
                                 | [] -> m
                                 in check_block map sl
                         | VarDecl(t, n) -> (StringMap.add n t map)
-                        | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
+                        | VarDeclAsn(t, n , _) -> (StringMap.add n t map)
                         | Asn(n, e) as ex -> let lt = type_of_identifier n map and rt = expr map e in 
                                 ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
                                 " = " ^ string_of_typ rt ^ " in " ^ string_of_stmt ex))) ; map
@@ -164,10 +167,10 @@ let check ast =
                                 if t = func.typ then map
                                 else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                                         string_of_typ func.typ ^ " in " ^ string_of_expr e))
-                        | For(s1, e, s2, s3) -> ignore(stmt (stmt (stmt map s1) s2) s3) ; map
+                        | For(s1, e, s2, s3) -> ignore(expr map e); ignore(stmt (stmt (stmt map s1) s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                        | Foreach(e1, e2, s) -> ignore(stmt map s); map
+                        | Foreach(e1, e2, s) -> ignore(expr map e1); ignore(expr map e2); ignore(stmt map s); map
                         | Elif(exprs, stmts) -> let check_e e = ignore(expr map e) and check_s s = ignore(stmt map s) in
                 List.iter check_e exprs; List.iter check_s stmts; map
 

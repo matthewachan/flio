@@ -12,7 +12,7 @@ clean:
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf testall.log *.diff *.err *.ll
 
-TARFILES = Makefile scanner.mll parser.mly ast.mli sast.ml
+TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml
 
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx filo.cmx
 
@@ -50,10 +50,10 @@ codegen.cmo: ast.cmo
 codegen.cmx: ast.cmx
 filo.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
 filo.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx 
-parser.cmo: ast.cmi parser.cmi 
-parser.cmx: ast.cmi parser.cmi 
+parser.cmo: ast.cmo parser.cmi 
+parser.cmx: ast.cmx parser.cmi 
 scanner.cmo: parser.cmi 
 scanner.cmx: parser.cmx 
 semant.cmo : ast.cmo
 semant.cmx : ast.cmx
-parser.cmi: ast.cmi 
+parser.cmi: ast.cmo 
