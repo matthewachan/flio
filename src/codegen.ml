@@ -59,24 +59,7 @@ let translate(globals, functions) =
          and str_format_str =
                  L.build_global_stringptr "%s" "fmt" builder in
 
-         let local_vars =
-                 let add_formal m (t, n) p =
-                         L.set_value_name n p;
-                         let local = L.build_alloca (ltype_of_typ t) n builder in
-                         ignore(L.build_store p local builder);
-                         StringMap.add n local m
-                  and add_local m (t, n) = 
-                          let local_var = L.build_alloca (ltype_of_typ t) n builder
-                          in StringMap.add n local_var m 
-                          
-          in
-
-          let formals = List.fold_left2 add_formal StringMap.empty
-                fdecl.S.sparams (Array.to_list (L.params the_function)) in 
-          List.fold_left add_local formals fdecl.slocals in  
-
-          let lookup n = try StringMap.find n local_vars
-                         with Not_found -> StringMap.find n global_vars
+          let lookup n = StringMap.find n global_vars
           in
 
           let rec expr builder = function

@@ -119,7 +119,6 @@ type program = {
 (* | Asn(id, e) -> id ^ " = " ^ (string_of_expr e) ^ ";\n" *)
 (* | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n" *)
 (* | PipeStmt(expr) -> string_of_expr expr ^ ";\n" *)
-(*
 | For of  stmt * expr * stmt * stmt
 | Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
@@ -176,3 +175,4 @@ let string_of_program (imports, funcs, stmts) =
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
+*)
