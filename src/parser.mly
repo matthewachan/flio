@@ -88,7 +88,6 @@ stmt_list:
 stmt:
   expr SEQUENCING								{ Expr($1) }
 | vdecl_stmt									{ $1 }
-| pipe_stmt									{ PipeStmt($1) }
 | asn_stmt									{ $1 }
 | RETURN expr SEQUENCING							{ Return($2) }
 | RETURN SEQUENCING								{ Return(Noexpr) }
@@ -105,9 +104,6 @@ vdecl_stmt:
 | typ ID ASSIGNMENT expr SEQUENCING		{ VarDeclAsn($1, $2, $4) }
 | typ ID ASSIGNMENT array_lit SEQUENCING 	{ VarDeclAsn($1, $2, $4) }
 
-pipe_stmt:
-    expr PIPE expr SEQUENCING			{ $1 :: [$3] }
-| expr PIPE pipe_stmt				{ $1 :: $3 }
 
 asn_stmt:
   ID ASSIGNMENT expr SEQUENCING							{ Asn($1, $3) }
@@ -129,8 +125,8 @@ expr_opt:
 expr:
   arith_expr				{ $1 }
 | logic_expr				{ $1 }
+| expr PIPE expr                        { Binop($1, Pipe, $3) }
 | uop_expr				{ $1 }
-| ID DOT ID				{ Field($1, $3) }
 | INTLIT				{ IntLit($1) }
 | STRINGLIT				{ StringLit($1) }
 | ID					{ Id($1) }
