@@ -1,9 +1,0 @@
-
-  File file;
-
-  file = fopen("c\mydoc\dict.txt");
-  int num = 4;
-
-  read(file, num);
-}
-
