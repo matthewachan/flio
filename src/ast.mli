@@ -3,7 +3,7 @@
   Author: Matthew Chan
 *)
 
-type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
+type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or | Pipe
 
 type uoperator = Neg | Not
 
@@ -33,7 +33,7 @@ type stmt =
 | VarDeclAsn of typ * string * expr
 | Asn of string * expr
 | Return of expr
-| PipeStmt of expr list
+| PipeStmt of expr
 | For of  stmt * expr * stmt * stmt
 | Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
@@ -46,7 +46,7 @@ type import =
 type fdecl = {
 	typ: typ;
 	fname: string;
-(*        locals: param list;*)
+        locals: param list;
 	params: param list;
 	body: stmt list;
 }
