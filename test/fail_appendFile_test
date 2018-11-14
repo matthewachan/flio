@@ -1,8 +1,0 @@
-
-    File x;
-    File y;
-    File z;
-    x = fopen("c\mydoc\dict.txt"); 
-    y = fopen("c\mydoc\lol.py");
-    z = appendFile(x,y);
-    print(z);	

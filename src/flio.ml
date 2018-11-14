@@ -1,21 +1,26 @@
-(*
-  flio.ml
-  Author: Matthew Chan
-*)
+type action = Ast | LLVM_IR | Compile
 
-open Ast
+let () =
+        let action = ref Compile in
+        let set_action a () = action := a in
+        let speclist = [
+                ("-a", Arg.Unit (set_action Ast), "Print the SAST");
+                ("-l", Arg.Unit (set_action LLVM_IR), "Print the generated LLVM IR");
+                ("-c", Arg.Unit (set_action Compile), "Check and print the generated LLVM IR (default)");
+                ] in
+        let usage_msg = "usage: ./filo.native [-a|-s|-l|-c] [file.f]" in
+        let channel = ref stdin in
+        Arg.parse speclist
+                (fun filename -> channel := open_in filename) usage_msg;
+        
+        let lexbuf = Lexing.from_channel !channel in
 
-let _ =
-        let lexbuf = Lexing.from_channel stdin in
-        try
-                let ast = Parser.program Scanner.token lexbuf in
-                Semant.check ast ; print_string (Ast.string_of_program ast)
-        with e ->
-                print_endline "Parsing failed - Invalid program.";
-                raise e
-(*
-    let _err_msg = Printexc.to_string e
-    and _trace = Printexc.get_backtrace () in
-    print_endline ("Parsing failed: " ^ err_msg ^ trace);
-    raise e
-*)
+        let ast = Parser.program Scanner.token lexbuf in
+        ignore(ast);
+        
+        match !action with
+             Ast -> print_string ("need to implement")
+           | LLVM_IR -> print_string ("need to implement")
+           | Compile -> let m = Codegen.translate ast in
+                Llvm_analysis.assert_valid_module m;
+                print_string (Llvm.string_of_llmodule m)
