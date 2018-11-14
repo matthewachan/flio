@@ -109,7 +109,6 @@ let translate(globals, functions) =
                             | A.Neq -> L.build_icmp L.Icmp.Ne
                             | A.And -> L.build_and
                             | A.Or -> L.build_or
-                            | A.Pipe -> L.build_add
                         ) e1' e2' "tmp" builder 
               | S.SUop (op, e, typ) -> L.const_int i32_t 0
                 (*let e' = expr builder e in
