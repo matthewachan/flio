@@ -49,7 +49,7 @@ decls:
 
 /* Imports */
 import:
-  IMPORT STRINGLIT	{ Import($2) }
+  IMPORT STRINGLIT	{ $2 }
 
 /* Function declaration / definition */
 fdecl:
