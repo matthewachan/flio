@@ -1,6 +1,0 @@
-String lol = "is plt tough?";
-file gidron = fopen("c\mydoc\plt.txt");
-file x = fopen("c\Users\mydoc\plt.txt");
-appendString(gidron, x);
-print("you are appending a file to  a file in appendString");
-

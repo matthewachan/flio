@@ -8,7 +8,7 @@
 LLI="lli"
 #LLI="/usr/local/opt/llvm/bin/lli"
 
-flio="./flio.native"
+FLIO="./flio.native"
 #flio="_build/flio.native"
 
 # time limit for operations
@@ -22,7 +22,7 @@ globalerror=0
 keep=0
 
 Usage() {
-    echo "Usage: testall.sh [options] [.flio files]"
+    echo "Usage: testall.sh [options] [.f files]"
     echo "-k    Keep intermediate files"
     echo "-h    Print this help"
     exit 1
@@ -42,7 +42,7 @@ Compare() {
     generatedfiles="$generatedfiles $3"
     echo diff -b $1 $2 ">" $3 1>&2
     diff -b "$1" "$2" > "$3" 2>&1 || {
-	SignalError "$1 differs"
+	SignalError "$1 differs from $2"
 	echo "FAILED $1 differs from $2" 1>&2
     }
 }
@@ -71,8 +71,8 @@ RunFail() {
 Check() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.flio//'`
-    reffile=`echo $1 | sed 's/.flio$//'`
+                             s/.f//'`
+    reffile=`echo $1 | sed 's/.f$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -85,7 +85,7 @@ Check() {
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
     Run "$FLIO" "<" $1 ">" "${basename}.ll" &&
     Run "$LLI" "${basename}.ll" ">" "${basename}.out" &&
-    Compare ${basename}.out ${reffile}.out ${basename}.diff
+    Compare ${basename}.out ${basename}.out ${basename}.diff
 
     # Report the status and clean up the generated files
 
@@ -104,8 +104,8 @@ Check() {
 CheckFail() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.flio//'`
-    reffile=`echo $1 | sed 's/.flio$//'`
+                             s/.f//'`
+    reffile=`echo $1 | sed 's/.f$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -117,7 +117,7 @@ CheckFail() {
 
     generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
     RunFail "$FLIO" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
-    Compare ${basename}.err ${reffile}.err ${basename}.diff
+    Compare ${basename}.err ${basename}.err ${basename}.diff
 
     # Report the status and clean up the generated files
 
@@ -159,7 +159,7 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="tests/test-*.flio tests/fail-*.flio"
+    files="test_suite/test-*.f test_suite/fail-*.f"
 fi
 
 for file in $files
@@ -171,10 +171,10 @@ do
 	*fail-*)
 	    CheckFail $file 2>> $globallog
 	    ;;
-	*)
-	    echo "unknown file type $file"
-	    globalerror=1
-	    ;;
+	# *)
+	#     echo "unknown file type $file"
+	#     globalerror=1
+	#     ;;
     esac
 done
 

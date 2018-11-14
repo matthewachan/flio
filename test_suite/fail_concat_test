@@ -1,6 +1,0 @@
-
-file x = fopen("/Users/gideonrono/Desktop/Screen Shot 2018-10-12 at 19.11.37.png");
-string l = "you";
-string y = "are a legend!";
-concat(x,y);
-print("you are concatenating a string to a file");

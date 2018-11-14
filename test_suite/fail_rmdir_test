@@ -1,4 +1,0 @@
-file f = fopen('c\mydoc\dict.txt");
-dir f = dopen("c\mydoc\");
-rmdir(f);
-print("f is not  a directory but a file");
