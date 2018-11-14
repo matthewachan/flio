@@ -63,15 +63,19 @@ let check ast =
                         (match op with
                           Neg when t = Int -> Int
                         | Not when t = Int -> Int
-                        | _ -> raise (Failure ("illegal unary operator ")))
+                        | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
+	  		   string_of_typ t ^ " in " ^ string_of_expr ex))
+                        )
                 | ArrAccess(n, idx) -> type_of_identifier n map
-                | FuncCall(f, args) -> let fd = function_decl f in 
+                | FuncCall(f, args) as call -> let fd = function_decl f in 
                         if List.length args != List.length fd.params then
-                                raise (Failure ("Mismatched number of arguments"))
+                                raise (Failure ("expecting " ^ string_of_int
+                                (List.length fd.params) ^ " arguments in " ^ string_of_expr call))
                         else
                                 List.iter2 (fun (ft, _) e -> let et = expr map e in
-                                ignore (check_assign ft et (Failure ("Illegal argument")))
-                                ) fd.params args ; fd.typ
+                                ignore (check_assign ft et (Failure ("illegal actual argument found " ^
+                                string_of_typ et ^ " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
+                                fd.params args ; fd.typ
                 | Binop(e1, op, e2) as e -> let t1 = expr map e1 and t2 = expr map e2 in
                         (match op with
                           Add | Sub | Mul | Div when t1 = Int && t2 = Int -> Int
@@ -79,17 +83,16 @@ let check ast =
                         | Lt | Gt when t1 = Int && t2 = Int -> Int
                         | And | Or when t1 = Int && t2 = Int -> Int
                         | Pipe when t1 = File && t2 = File -> File 
-                        | _ -> raise (Failure ("illegal binary operator " ))
-                (* ^ *)
-                (*       string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^ *)
-                (*       string_of_typ t2 ^ " in " ^ string_of_expr e)) *)
-                )
+                        | _ -> raise (Failure ("illegal binary operator " ^ 
+                                string_of_typ t1 ^ " " ^ string_of_op op ^
+                                " " ^ string_of_typ t2 ^ " in " ^ string_of_expr e))
+                        )
 
         in 
 
         let check_bool_expr map e = if expr map e != Int
-                then raise (Failure ("expected Boolean expression in " ))
-                (* ^ string_of_expr e)) *)
+                then raise (Failure ("expected Boolean expression in "
+                        ^ string_of_expr e))
                 else ()
         in
 
@@ -109,12 +112,13 @@ let check ast =
                                 | s :: ss -> check_block (stmt m s) ss
                                 | [] -> m
                                 in check_block map sl
-                        | VarDecl(t, n) as var -> (StringMap.add n t map)
+                        | VarDecl(t, n) -> (StringMap.add n t map)
                         | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
-                        | Asn(n, e) -> let lt = type_of_identifier n map and rt = expr map e in 
-                                ignore(check_assign lt rt (Failure ("illegal assignment"))); map
+                        | Asn(n, e) as ex -> let lt = type_of_identifier n map and rt = expr map e in 
+                                ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+                                " = " ^ string_of_typ rt ^ " in " ^ string_of_stmt ex))) ; map
                         | Expr e -> ignore(expr map e) ; map
-                        | Return e -> raise (Failure ("Returns not allowed outside of function scope"))
+                        | Return e -> raise (Failure ("returns not allowed outside of function scope"))
                         | For(s1, e, s2, s3) -> ignore(stmt (stmt (stmt map s1) s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
@@ -150,14 +154,16 @@ let check ast =
                                 | s :: ss -> check_block (stmt m s) ss
                                 | [] -> m
                                 in check_block map sl
-                        | VarDecl(t, n) as var -> (StringMap.add n t map)
+                        | VarDecl(t, n) -> (StringMap.add n t map)
                         | VarDeclAsn(t, n ,e) -> (StringMap.add n t map)
-                        | Asn(n, e) -> let lt = type_of_identifier n map and rt = expr map e
-                                in ignore(check_assign lt rt (Failure ("illegal assignment"))); map
+                        | Asn(n, e) as ex -> let lt = type_of_identifier n map and rt = expr map e in 
+                                ignore(check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
+                                " = " ^ string_of_typ rt ^ " in " ^ string_of_stmt ex))) ; map
                         | Expr e -> ignore(expr map e) ; map
                         | Return e -> let t = expr map e in
                                 if t = func.typ then map
-                                else raise (Failure ("Return type mismatch"))
+                                else raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
+                                        string_of_typ func.typ ^ " in " ^ string_of_expr e))
                         | For(s1, e, s2, s3) -> ignore(stmt (stmt (stmt map s1) s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
