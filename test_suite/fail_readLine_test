@@ -1,4 +1,0 @@
-int x = 4;
-file input = open('input.txt');
-readLine(x);
-

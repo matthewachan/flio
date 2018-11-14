@@ -1,3 +1,0 @@
-  string x;
-  x = "testing string";
-  print(x);

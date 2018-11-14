@@ -1,6 +1,0 @@
-
-int x = 4;
-dir f = dopen(4);
-print("you are calling dopen on an int");
-
-

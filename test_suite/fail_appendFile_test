@@ -1,8 +1,0 @@
-
-    File x;
-    File y;
-    File z;
-    x = fopen("c\mydoc\dict.txt"); 
-    y = "you are appending a file with a string";
-    z = appendFile(x,y);
-    print(z);	

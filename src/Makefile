@@ -1,5 +1,5 @@
 .PHONY : all
-all : flio.native
+all : flio.native printbig.o
 
 .PHONY : flio.native
 flio.native :
@@ -11,8 +11,9 @@ clean:
 	rm -rf scanner.ml parser.ml parser.mlii flio
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf testall.log *.diff *.err *.ll
+	rm -rf printbig
 
-TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml
+TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml printbig.c
 
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx flio.cmx
 
@@ -33,6 +34,9 @@ parser.ml parser.mli : parser.mly
 	ocamlc -c $<
 %.cmx: %.ml
 	ocamlfind ocamlopt -c -package llvm $<
+
+printbig: printbig.c
+	cc -o printbig -DBUILD_TEST printbig.c
 
 flio.tar.gz : $(TARFILES)
 	cd .. && tar zcf flio/flio.tar.gz $(TARFILES:%=flio/%)

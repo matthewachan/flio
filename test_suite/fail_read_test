@@ -1,7 +1,0 @@
-
-  file f = fopen("c\mydoc\dict.txt");
-  int num = 4;
-  string y = "lol";
-  read(f, y);
-  print("fails because string cannot define character length");
-
