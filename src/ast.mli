@@ -58,8 +58,6 @@ type program = {
 	imports: import list;
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 (* Pretty printing functions 
  let string_of_op = function 
    Add -> "+" 
@@ -72,9 +70,6 @@ type program = {
  | Gt -> ">" 
  | And -> "and" 
  | Or -> "or" 
-=======
-=======
->>>>>>> parent of 08f8000... Pretty Printer Functions/AST mostly done
 (* Pretty printing functions *)
 (* let string_of_op = function *)
 (*   Add -> "+" *)
@@ -87,10 +82,6 @@ type program = {
 (* | Gt -> ">" *)
 (* | And -> "and" *)
 (* | Or -> "or" *)
-<<<<<<< HEAD
->>>>>>> parent of 08f8000... Pretty Printer Functions/AST mostly done
-=======
->>>>>>> parent of 08f8000... Pretty Printer Functions/AST mostly done
 (* | Pipe -> "|>" *)
 
 (* let string_of_uop = function *)
@@ -180,19 +171,12 @@ let string_of_fdecl fdecl =
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 let string_of_program (imports, funcs, stmts) =
   String.concat "\n" (List.map string_of_import imports) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs) ^ "\n" ^
   String.concat "\n" (List.map string_of_stmt stmts) 
  *) 
-=======
-=======
->>>>>>> parent of 08f8000... Pretty Printer Functions/AST mostly done
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
-  *)
-<<<<<<< HEAD
->>>>>>> parent of 08f8000... Pretty Printer Functions/AST mostly done
-=======
->>>>>>> parent of 08f8000... Pretty Printer Functions/AST mostly done
