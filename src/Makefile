@@ -12,7 +12,14 @@ clean:
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf testall.log *.diff *.err *.ll
 
-TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml
+TESTS = decl hello hello2 number loop
+
+FAILS = assign
+
+TESTFILES = $(TESTS:%=test-%.f) $(FAILS:%=fail-%.f)
+
+TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml \
+	   testall.sh codegen.ml flio.ml $(TESTFILES:%=test_suite/%) 
 
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx flio.cmx
 
@@ -35,7 +42,7 @@ parser.ml parser.mli : parser.mly
 	ocamlfind ocamlopt -c -package llvm $<
 
 flio.tar.gz : $(TARFILES)
-	cd .. && tar zcf flio/flio.tar.gz $(TARFILES:%=flio/%)
+	cd .. && tar zcf src/flio.tar.gz $(TARFILES:%=src/%)
 
 #.PHONY : clean
 #clean :
