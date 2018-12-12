@@ -37,12 +37,12 @@ let check ast =
 
         let built_in_decls =  StringMap.add "print"
                 { typ = Void; fname = "print"; params = [(Int, "x")];
-                body = [] } 
+                body = [] } StringMap.empty
         in
      
         (* Keep track of function declarations *)
         let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-        built_in_decls ast.funcs 
+        built_in_decls ast.funcs
         in
 
         let function_decl s = try StringMap.find s function_decls
