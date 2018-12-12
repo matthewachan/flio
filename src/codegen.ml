@@ -53,6 +53,7 @@ let translate program =
 
   let builder = L.builder_at_end context (L.entry_block main_func) in
   let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+  let str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
 
   (* Build statments inside of the main function *) 
   let build_stmts s =
@@ -62,9 +63,13 @@ let translate program =
       | A.Noexpr -> L.const_int i32_t 0
       | A.FuncCall ("print", [e]) -> 
                       L.build_call printf_func [| int_format_str ; (expr map builder e) |] "printf" builder
+      | A.FuncCall ("prints", [e]) -> 
+                      L.build_call printf_func [| str_format_str; (expr map builder e) |] "printf" builder
       | A.Binop (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.Uop (_, _) -> raise (Failure ("not implemented yet"))
-      | A.StringLit s -> L.build_global_stringptr s "string" builder
+      | A.StringLit s -> 
+                      L.build_global_stringptr s "strptr" builder
+                      (* L.const_string context s *) 
       | A.Id s -> L.build_load (lookup s map) s builder 
       | A.FuncCall(_, _) -> raise (Failure ("not implemented yet"))
       | A.ArrAccess (_, _) -> raise (Failure ("not implemented yet"))
@@ -86,12 +91,16 @@ let translate program =
       | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
       | A.Return _ -> raise (Failure ("not implemented yet"))
       | A.VarDecl (t, n) -> let init = (match t with
-                        A.Int -> L.const_int i32_t 0
-                      | A.String -> L.const_string context ""
+                        A.Int -> L.build_alloca i32_t n (snd mb) 
+                                (* L.const_int i32_t 0 *)
+                      | A.String -> 
+                                      L.build_alloca str_ptr_t n (snd mb)
+                                      (* L.const_string context "" *)
                 ) in
-      ((StringMap.add n (L.define_global n init the_module) (fst mb)), snd mb)
+      ((StringMap.add n init (fst mb)), snd mb)
       | A.VarDeclAsn (_, _, _) -> raise (Failure ("not implemented yet"))
-      | A.Asn (_, _) -> raise (Failure ("not implemented yet"))
+      | A.Asn (s, e) -> let e' = expr (fst mb) (snd mb) e in
+        ignore(L.build_store e' (lookup s (fst mb)) (snd mb)) ; mb
     in
 
     (* Build the code for each statement in the function *)

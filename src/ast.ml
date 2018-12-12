@@ -47,8 +47,6 @@ type fdecl = {
 	body: stmt list;
 }
 
-type items  = Stmt of stmt |  Function of fdecl 
-
 (* Program is composed of functions, statements and imports *)
 type program = {
 	funcs: fdecl list;
