@@ -99,7 +99,30 @@ let translate program =
         (List.fold_left stmt mb sl)
       | A.Expr e -> ignore (expr (fst mb) (snd mb) e); mb
       | A.Nostmt -> raise (Failure ("not implemented yet"))
-      | A.For (_, _, _, _) -> raise (Failure ("not implemented yet")) 
+      | A.For (s1, e, s2, body) -> 
+                (* Construct for basic block *)
+                let init_bb = L.append_block context "init" main_func in
+                ignore (L.build_br init_bb (snd mb)); 
+                
+                let pred_bb = L.append_block context "for" main_func in
+                pred_bb;
+
+                let init = stmt (fst mb, L.builder_at_end context init_bb) s1 in
+                add_terminal (snd init) (L.build_br pred_bb);
+
+                (* Construct body basic block, and add s2 at the tail *)
+                let body_bb = L.append_block context "for_body" main_func in
+                let b = (stmt (fst mb, L.builder_at_end context body_bb) body) in
+                add_terminal (snd (stmt b s2)) (L.build_br pred_bb);
+
+                (* Do initialization before checking the predicate e *)
+                let pred_builder = L.builder_at_end context pred_bb in
+                let bool_val = expr (fst init) pred_builder e in
+
+                (* Construct merge basic block *)
+                let merge_bb = L.append_block context "merge" main_func in
+                ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+                (fst mb, L.builder_at_end context merge_bb)
       | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.If (p, then_stmt, else_stmt) -> 
          let bool_val = expr (fst mb) builder p in
@@ -115,7 +138,6 @@ let translate program =
 
 	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
 	  (fst mb, L.builder_at_end context merge_bb)
-        (* ignore(add_terminal (L.builder_at_end context merge_bb) (L.build_ret (L.const_int i32_t 0))) *)
       | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
       | A.Return _ -> raise (Failure ("not implemented yet"))
       | A.VarDecl (t, n) -> let init = (match t with
