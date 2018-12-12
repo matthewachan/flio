@@ -101,7 +101,21 @@ let translate program =
       | A.Nostmt -> raise (Failure ("not implemented yet"))
       | A.For (_, _, _, _) -> raise (Failure ("not implemented yet")) 
       | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
-      | A.If (_, _, _) -> raise (Failure ("not implemented yet"))
+      | A.If (p, then_stmt, else_stmt) -> 
+         let bool_val = expr (fst mb) builder p in
+	 let merge_bb = L.append_block context "merge" main_func in
+
+	 let then_bb = L.append_block context "then" main_func in
+	 add_terminal (snd (stmt (fst mb, L.builder_at_end context then_bb) then_stmt))
+	   (L.build_br merge_bb);
+
+	 let else_bb = L.append_block context "else" main_func in
+	 add_terminal (snd (stmt (fst mb, L.builder_at_end context else_bb) else_stmt))
+	   (L.build_br merge_bb);
+
+	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+	  (fst mb, L.builder_at_end context merge_bb)
+        (* ignore(add_terminal (L.builder_at_end context merge_bb) (L.build_ret (L.const_int i32_t 0))) *)
       | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
       | A.Return _ -> raise (Failure ("not implemented yet"))
       | A.VarDecl (t, n) -> let init = (match t with
@@ -122,9 +136,10 @@ let translate program =
     in
 
     (* Build the code for each statement in the function *)
-    stmt (main_vars, builder) (A.Block s) in
+    let builder = (snd (stmt (main_vars, builder) (A.Block s))) in
+          add_terminal builder (L.build_ret (L.const_int i32_t 0))
+  in
 
   ignore(build_stmts program.A.stmts);
   (* Add terminal for main function *)
-  add_terminal builder (L.build_ret (L.const_int i32_t 0)); 
   the_module
