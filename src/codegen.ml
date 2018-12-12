@@ -65,7 +65,21 @@ let translate program =
                       L.build_call printf_func [| int_format_str ; (expr map builder e) |] "printf" builder
       | A.FuncCall ("prints", [e]) -> 
                       L.build_call printf_func [| str_format_str; (expr map builder e) |] "printf" builder
-      | A.Binop (_, _, _) -> raise (Failure ("not implemented yet"))
+      | A.Binop (e1, op, e2) -> 
+	  let e1' = expr map builder e1
+	  and e2' = expr map builder e2 in
+	  (match op with
+	    A.Add     -> L.build_add
+	  | A.Sub     -> L.build_sub
+	  | A.Mul    -> L.build_mul
+          | A.Div     -> L.build_sdiv
+	  | A.And     -> L.build_and
+	  | A.Or      -> L.build_or
+	  | A.Eq   -> L.build_icmp L.Icmp.Eq
+	  | A.Neq     -> L.build_icmp L.Icmp.Ne
+	  | A.Lt    -> L.build_icmp L.Icmp.Slt
+	  | A.Gt -> L.build_icmp L.Icmp.Sgt
+	  ) e1' e2' "tmp" builder
       | A.Uop (_, _) -> raise (Failure ("not implemented yet"))
       | A.StringLit s -> 
                       L.build_global_stringptr s "strptr" builder
@@ -92,13 +106,17 @@ let translate program =
       | A.Return _ -> raise (Failure ("not implemented yet"))
       | A.VarDecl (t, n) -> let init = (match t with
                         A.Int -> L.build_alloca i32_t n (snd mb) 
-                                (* L.const_int i32_t 0 *)
-                      | A.String -> 
-                                      L.build_alloca str_ptr_t n (snd mb)
-                                      (* L.const_string context "" *)
+                      | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 ) in
-      ((StringMap.add n init (fst mb)), snd mb)
-      | A.VarDeclAsn (_, _, _) -> raise (Failure ("not implemented yet"))
+              ((StringMap.add n init (fst mb)), snd mb)
+      | A.VarDeclAsn (t, s, e) -> let init = (match t with
+                        A.Int -> L.build_alloca i32_t s (snd mb) 
+                      | A.String -> L.build_alloca str_ptr_t s (snd mb)
+                ) in
+                let m = (StringMap.add s init (fst mb)) in
+              let e' = expr (m) (snd mb) e in
+                ignore(L.build_store e' (lookup s (m)) (snd mb)) ; (m, (snd mb))
+
       | A.Asn (s, e) -> let e' = expr (fst mb) (snd mb) e in
         ignore(L.build_store e' (lookup s (fst mb)) (snd mb)) ; mb
     in
