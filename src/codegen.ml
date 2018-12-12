@@ -25,22 +25,12 @@ let translate program =
 
    in 
 
-   let statements = 
-           let statement_items = List.filter (fun x-> match x with 
-           A.Stmt (x) -> true
-          | _-> false) program
-           in List.map (fun x -> match x with
-                A.Stmt (x) -> x
-              | _ -> raise( Failure("Conversion failed"))) statement_items
-
-    in
-
    (* extract all the global variables from the statements *)
    let globals = 
            let global_list = List.filter (fun x -> match x with
            A.VarDecl(_, _) -> true
          | A.VarDeclAsn(_, _, _) -> true
-         | _ -> false) statements
+         | _ -> false) program.A.stmts
            in List.map (fun x-> match x with
            A.VarDecl(x, name) -> (x, name)
          | A.VarDeclAsn(x, name, _) -> (x, name)
@@ -48,25 +38,16 @@ let translate program =
 
    in
 
-   let not_globals = List.filter (fun x -> match x with
-        A.VarDecl(x, _) -> false
-       | _ -> true) statements in
-
    let functions = 
-           let fdecl_main = A.Function({
-                   typ = A.Int;
-                   fname = "main";
-                   params = [];
-                   body = List.rev(A.Return(A.IntLit(0))::List.rev(not_globals))
-                 })
-           in let other_functions = List.filter (fun x -> match x with
-                A.Function(x) -> true
-              | _ -> false) program
-           in 
-           let all_functions = fdecl_main:: other_functions in List.map
-           (fun x -> match x with 
-                A.Function(x) -> x
-               | _ -> raise(Failure("Invalid function passed in"))) all_functions
+           let fdecl_main = {
+                   A.typ = A.Int;
+                   A.fname = "main";
+                   A.params = [];
+                   A.body = program.A.stmts;
+                 }
+           in let other_functions = program.A.funcs
+           in
+        fdecl_main:: other_functions 
    in 
 
    (*Initialize all the global variables and add them to a string map*)
@@ -181,7 +162,7 @@ let translate program =
       | A.Expr e -> ignore (expr builder e); builder
       | A.Nostmt -> builder
       | A.For (e1, e2, e3, body) -> 
-      (*  let loop predicate body =
+      let loop predicate body =
                 let pred_bb = L.append_block context "while" the_function in
                 ignore (L.build_br pred_bb builder);
 
@@ -198,9 +179,9 @@ let translate program =
     in stmt builder
                 (A.Block [(stmt builder e1);
                         loop (e2, A.Block [body ;
-                                                (stmt builder e3)]) ] )*)
+                                                (stmt builder e3)]) ] )
                 
-       raise (Failure ("not implemented yet")) 
+       (*raise (Failure ("not implemented yet")) *)
       | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.If (predicate, then_stmt, else_stmt) -> 
         let bool_val = expr builder predicate in
@@ -229,15 +210,15 @@ let translate program =
     in
 
     (* Build the code for each statement in the function *)
-   let builder =  stmt builder (A.Block fdecl.A.body) in
+   let builder = stmt builder (A.Block fdecl.A.body) in
 
 (*  ignore(build_stmts program.A.stmts) in*)
   (* Add terminal for main function *)
   (*add_terminal builder (L.build_ret (L.const_int i32_t 0));*)
 
    add_terminal builder (match fdecl.A.typ with 
-   A.Void -> L.build_ret_void
-  | t -> L.build_ret (L.const_int (ltype_of_typ t)  0)) in 
+           A.Void -> L.build_ret_void
+          | t -> L.build_ret (L.const_int (ltype_of_typ t)  0)) in
 
   List.iter build_function_body functions;  
 
