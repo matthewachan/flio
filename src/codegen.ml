@@ -9,19 +9,19 @@ let translate program =
     let the_module = L.create_module context "flio"
     and i32_t = L.i32_type context
     and i8_t = L.i8_type context
-    (* and str_ptr_t = L.pointer_type (L.i8_type context) *)
-    (* and void_t = L.void_type context *) 
+    and str_ptr_t = L.pointer_type (L.i8_type context)
+    and void_t = L.void_type context 
   in       
 
   (* Pattern match AST types to LLVM types *)
-  (* let ltype_of_typ = function *)
-  (*       A.Int -> i32_t *)
-  (*     | A.String -> str_ptr_t *)
-  (*     | A.Void -> void_t *)
+  let ltype_of_typ = function
+        A.Int -> i32_t
+      | A.String -> str_ptr_t
+      | A.Void -> void_t
   (*     | A.File -> raise (Failure ("not implemented yet")) *)
   (*     | A.Dir -> raise (Failure ("not implemented yet")) *)
   (*     | A.Array (_, _) -> raise (Failure ("not implemented yet")) *)
-  (* in *)
+  in
 
   let add_terminal builder f =
     match L.block_terminator (L.insertion_block builder) with
@@ -53,7 +53,7 @@ let translate program =
                       L.build_call printf_func [| int_format_str ; (expr builder e) |] "printf" builder
       | A.Binop (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.Uop (_, _) -> raise (Failure ("not implemented yet"))
-      | A.StringLit _ -> raise (Failure ("not implemented yet"))
+      | A.StringLit s -> L.build_global_stringptr s "string" builder
       | A.Id _ -> raise (Failure ("not implemented yet"))
       | A.FuncCall(_, _) -> raise (Failure ("not implemented yet"))
       | A.ArrAccess (_, _) -> raise (Failure ("not implemented yet"))
