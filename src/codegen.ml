@@ -152,7 +152,9 @@ let translate program =
 	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
 	  (fst mb, L.builder_at_end context merge_bb)
       | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
-      | A.Return _ -> raise (Failure ("not implemented yet"))
+      | A.Return e -> ignore(match fdecl.A.typ with
+                  A.Void -> L.build_ret_void (snd mb)
+                | _ -> L.build_ret (fexpr (fst mb) (snd mb) e) (snd mb)); mb
       | A.VarDecl (t, n) -> let init = 
               (match t with
                   A.Int -> L.build_alloca i32_t n (snd mb) 
@@ -283,7 +285,6 @@ let translate program =
 	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
 	  (fst mb, L.builder_at_end context merge_bb)
       | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
-      | A.Return _ -> raise (Failure ("not implemented yet"))
       | A.VarDecl (t, n) -> let init = 
               (match t with
                   A.Int -> L.build_alloca i32_t n (snd mb) 
