@@ -21,7 +21,7 @@ let translate program =
        | A.Void -> void_t 
        | A.File -> L.struct_type context [|str_ptr_t; i32_t; str_array |]  
        | A.Dir -> L.struct_type context [|str_ptr_t; str_array; str_array; str_array|]
-       | A.Array (typ, size) -> L.struct_type context [|L.pointer_type (ltype_of_typ typ); i32_t|]
+       | A.Array (typ, _) -> L.struct_type context [|L.pointer_type (ltype_of_typ typ); i32_t|]
 
    in 
 
@@ -78,12 +78,6 @@ let translate program =
           let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
           let builder = L.builder_at_end context (L.entry_block the_function)  in
           
-
-(* Declare main function *)
-(* let main_t = L.function_type i32_t [| |] in
-  let main_func = L.define_function "main" main_t the_module in
-
-  let builder = L.builder_at_end context (L.entry_block main_func) in*)
   let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
 
   let lookup n = try StringMap.find n global_vars 
@@ -95,9 +89,6 @@ let translate program =
          | 1 -> [ 0]
          | n -> int_range (n-1) @ [n-1] in 
 
-  (* Build statments inside of the main function *) 
-(*  let build_stmts s =*)
-    (* Construct code for an expression; return its value *)
 
     let add_terminal builder f =
             match L.block_terminator (L.insertion_block builder) with 
@@ -122,6 +113,7 @@ let translate program =
                               | A.Neq -> L.build_icmp L.Icmp.Ne
                               | A.And -> L.build_and
                               | A.Or -> L.build_or
+                              | A.Pipe -> raise(Failure("not implemented yet"))
                              ) e1' e2' "tmp" builder
       | A.Uop (op, e) -> let e' = expr builder e in
                         (match op with 
@@ -135,8 +127,7 @@ let translate program =
                 A.Void -> ""
                | _ -> f  ^"_result") in
         L.build_call fdef (Array.of_list llargs) result builder
-        (*raise (Failure ("not implemented yet"))*)
-      | A.ArrAccess (id, exp) -> (*L.build_load (L.build_gep (lookup id) [|(expr builder exp); (L.const_int i32_t 0)|] s builder) s builder*) raise(Failure("not implemented"))
+      | A.ArrAccess (id, exp) -> (L.build_load (L.build_gep (lookup id) [|(expr builder exp); (L.const_int i32_t 0)|] id builder) id builder)
       | A.ArrLit (l) -> 
           let size = L.const_int i32_t (List.length l) in
           let all = List.map (fun e -> expr builder e) l in 
@@ -152,9 +143,10 @@ let translate program =
           ignore(L.build_store new_array second builder);
           let actual_literal = L.build_load new_lit "actual_arr_literal" builder 
           in actual_literal;
-       | A.Id s -> L.build_load (lookup s) s builder 
+       | A.Id s -> L.build_load (lookup s) s builder
  
     in  
+
   (* Build the code for the given statement; return the builder for
        the statement's successor *)
     let rec stmt builder = function
@@ -162,7 +154,7 @@ let translate program =
       | A.Expr e -> ignore (expr builder e); builder
       | A.Nostmt -> builder
       | A.For (e1, e2, e3, body) -> 
-      let loop predicate body =
+      (*let loop predicate body =
                 let pred_bb = L.append_block context "while" the_function in
                 ignore (L.build_br pred_bb builder);
 
@@ -176,12 +168,9 @@ let translate program =
                 ignore(L.build_cond_br bool_val body_bb merge_bb pred_builder);
                 L.builder_at_end context merge_bb
 
-    in stmt builder
-                (A.Block [(stmt builder e1);
-                        loop (e2, A.Block [body ;
-                                                (stmt builder e3)]) ] )
+    in stmt builder ( A.Block [e1; (loop (e2, A.Block [body ; e3] ) ) ] ) *)
                 
-       (*raise (Failure ("not implemented yet")) *)
+       raise (Failure ("not implemented yet"))  
       | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.If (predicate, then_stmt, else_stmt) -> 
         let bool_val = expr builder predicate in
@@ -196,13 +185,21 @@ let translate program =
         ignore(L.build_cond_br bool_val then_bb else_bb builder);
 
         L.builder_at_end context merge_bb
-       (*raise(Failure ("not implemented yet"))*)
-      | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
+      | A.Elif (exprs, stmts) -> 
+                      let bool_val = expr builder (List.hd exprs) in
+                      let merge_bb = L.append_block context "merge" the_function in
+                     (* let b_br_merge = L.build_br merge_bb in*)
+                      let then_bb = L.append_block context "then" the_function in 
+                      add_terminal(stmt (L.builder_at_end context then_bb) (List.hd stmts)) (L.build_br merge_bb);
+                      let else_bb = L.append_block context "else" the_function
+                      in (add_terminal (stmt (L.builder_at_end context else_bb) (A.Elif(List.tl exprs, List.tl stmts)))) (L.build_br merge_bb); 
+                      ignore(L.build_cond_br bool_val then_bb else_bb builder); 
+
+                      L.builder_at_end context merge_bb 
       | A.Return e  -> ignore(match fdecl.A.typ with
                 A.Void -> L.build_ret_void builder
                | _ -> L.build_ret (expr builder e) builder);
                builder
-      (*raise (Failure ("not implemented yet"))*)
       | A.VarDecl (_, _) -> builder
       | A.VarDeclAsn (_, name, expr) -> ignore (stmt builder (A.Asn(name, expr))); builder
       | A.Asn (s, e) ->  let e' = expr builder e in ignore(L.build_store e' (lookup s) builder); builder
@@ -212,14 +209,12 @@ let translate program =
     (* Build the code for each statement in the function *)
    let builder = stmt builder (A.Block fdecl.A.body) in
 
-(*  ignore(build_stmts program.A.stmts) in*)
   (* Add terminal for main function *)
-  (*add_terminal builder (L.build_ret (L.const_int i32_t 0));*)
 
    add_terminal builder (match fdecl.A.typ with 
            A.Void -> L.build_ret_void
           | t -> L.build_ret (L.const_int (ltype_of_typ t)  0)) in
 
-  List.iter build_function_body functions;  
+   List.iter build_function_body functions;  
 
-  the_module
+   the_module
