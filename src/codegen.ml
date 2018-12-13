@@ -40,13 +40,19 @@ let translate program =
   let printf_func = L.declare_function "printf" printf_t the_module in
 
   let fopen_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
-  let fopen_func = L.declare_function "fopen" fopen_t the_module in
+  let fopen_func = L.declare_function "open" fopen_t the_module in
 
   let delete_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let delete_func = L.declare_function "remove" delete_t the_module in
 
-  let copy_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+  let copy_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
   let copy_func = L.declare_function "copy" copy_t the_module in
+
+  let move_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+  let move_func = L.declare_function "move" move_t the_module in
+
+  let write_t = L.function_type i32_t [| i32_t ; L.pointer_type i8_t |] in
+  let write_func = L.declare_function "bwrite" write_t the_module in
 
   (* Build a map of function declarations *)
   let function_decls =
@@ -220,11 +226,15 @@ let translate program =
               L.build_call printf_func [| int_format_str ; 
               (expr map builder e) |] "printf" builder
       | A.FuncCall ("fopen", [e]) ->
-	  L.build_call fopen_func [| (expr map builder e) |] "fopen" builder
+                      L.build_call fopen_func [| (expr map builder e) ; L.const_int i32_t 2 |] "fopen" builder
       | A.FuncCall ("delete", [e]) ->
 	  L.build_call delete_func [| (expr map builder e) |] "delete" builder
       | A.FuncCall ("copy", [e1 ; e2]) ->
                       L.build_call copy_func [| (expr map builder e1) ; (expr map builder e2)|] "copy" builder
+      | A.FuncCall ("write", [e1 ; e2]) ->
+                      L.build_call write_func [| (expr map builder e1) ; (expr map builder e2)|] "write" builder
+      | A.FuncCall ("move", [e1 ; e2]) ->
+                      L.build_call move_func [| (expr map builder e1) ; (expr map builder e2)|] "move" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (expr map builder e) |] "printf" builder

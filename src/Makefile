@@ -1,10 +1,14 @@
+$CC = gcc
+
 .PHONY : all
-all : flio.native
+all : clean flio.native
 
 .PHONY : flio.native
 flio.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		flio.native
+	$(CC) -c stdlib.c
+
 .PHONY: clean
 clean:
 	ocamlbuild -clean
