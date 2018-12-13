@@ -12,6 +12,7 @@ let translate program =
     and i8_t = L.i8_type context
     and str_ptr_t = L.pointer_type (L.i8_type context)
     and str_arr_ptr_t n = L.array_type (L.pointer_type (L.i8_type context)) n
+    and double_ptr_t = L.pointer_type (L.pointer_type (L.i8_type context))
     and void_t = L.void_type context 
   in       
 
@@ -23,6 +24,7 @@ let translate program =
       | A.File -> str_ptr_t 
       | A.Dir -> str_ptr_t 
       | A.Array (_, s) -> str_arr_ptr_t s
+      | A.Proc s -> str_arr_ptr_t s
   in
 
   (* Utility function for getting a val from a map, given a key *)
@@ -196,6 +198,7 @@ let translate program =
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
+                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
@@ -205,6 +208,7 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> raise (Failure ("not implemented yet"))
+                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
@@ -360,6 +364,7 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
+                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
@@ -370,6 +375,7 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
+                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in

@@ -5,14 +5,14 @@
 
 %{ open Ast %}
 
-%token INT STRING FILE DIR
+%token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
+%token INT STRING FILE DIR PROC
 %token PLUS MINUS TIMES DIVIDE ASSIGNMENT PIPE
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
 %token DOT
 %token IMPORT
 %token FOR FOREACH IN IF ELIF ELSE
-%token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token <int> INTLIT
 %token <string> STRINGLIT
 %token <string> ID
@@ -24,8 +24,9 @@
 %left CALL
 %left OR
 %left AND
-%left SEQUENCING
-%left LT GT EQ NEQ
+// %left SEQUENCING
+%left EQ NEQ
+%left LT GT 
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left PIPE
@@ -123,33 +124,24 @@ expr_opt:
 | expr		{ $1 }
 
 expr:
-  arith_expr				{ $1 }
-| logic_expr				{ $1 }
-| expr PIPE expr                        { Binop($1, Pipe, $3) }
-| uop_expr				{ $1 }
+  expr PIPE expr                        { Binop($1, Pipe, $3) }
 | INTLIT				{ IntLit($1) }
 | STRINGLIT				{ StringLit($1) }
 | ID					{ Id($1) }
 | ID LPAREN args RPAREN	%prec CALL	{ FuncCall($1, $3) }
 | ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
-
-arith_expr:
-  expr PLUS  expr			{ Binop($1, Add, $3) }
+| expr PLUS  expr			{ Binop($1, Add, $3) }
 | expr MINUS expr			{ Binop($1, Sub, $3) }
 | expr TIMES expr			{ Binop($1, Mul, $3) }
 | expr DIVIDE expr			{ Binop($1, Div, $3) }
-
-logic_expr:
-  expr LT  expr				{ Binop($1, Lt, $3) }
+| expr LT  expr				{ Binop($1, Lt, $3) }
 | expr GT  expr				{ Binop($1, Gt, $3) }
 | expr EQ  expr				{ Binop($1, Eq, $3) }
 | expr NEQ  expr			{ Binop($1, Neq, $3) }
 | expr AND  expr			{ Binop($1, And, $3) }
 | expr OR  expr				{ Binop($1, Or, $3) }
-
-uop_expr:
-  NOT expr				{ Uop(Not, $2) }
-/*| MINUS expr %prec NEG			{ Uop(Neg, $2) }*/
+| NOT expr				{ Uop(Not, $2) }
+// | MINUS expr %prec NEG			{ Uop(Neg, $2) }
 
 /* Types */
 typ_opt:
@@ -162,3 +154,4 @@ typ:
 | FILE		{ File }
 | DIR		{ Dir }
 | typ LBRACK INTLIT RBRACK { Array($1, $3) }
+| PROC LBRACK INTLIT RBRACK { Proc($3) }
