@@ -38,12 +38,17 @@ let check ast =
         let built_in_decls =  StringMap.add "print"
                 { typ = Void; fname = "print"; params = [(Int, "x")];
                 body = [] } (StringMap.add "prints" { typ = Void; fname = "prints"; params = [(String, "x")];
-                body = []} (StringMap.add "fopen" { typ = Int; fname = "fopen"; params = [(File, "x")];
-                body = []} (StringMap.add "delete" { typ = Int; fname = "delete"; params = [(File, "x")];
-                body = []} (StringMap.add "copy" { typ = Int; fname = "copy"; params = [(File, "src") ; (String, "dest")];
-                body = []} (StringMap.add "move" { typ = Int; fname = "move"; params = [(File, "src") ; (String, "dest")];
-                body = []} (StringMap.add "write" { typ = Int; fname = "write"; params = [(Int, "fd") ; (String, "buf")];
-                body = []} StringMap.empty))))))
+                body = []} (StringMap.add "fopen" { typ = File; fname = "fopen"; params = [(String, "f")];
+                body = []} (StringMap.add "delete" { typ = Int; fname = "delete"; params = [(String, "x")];
+                body = []} (StringMap.add "copy" { typ = Int; fname = "copy"; params = [(String, "src") ; (String, "dest")];
+                body = []} (StringMap.add "move" { typ = Int; fname = "move"; params = [(String, "src") ; (String, "dest")];
+                body = []} (StringMap.add "write" { typ = Int; fname = "write"; params = [(File, "f") ; (String, "buf")];
+                body = []} (StringMap.add "read" { typ = String; fname = "read"; params = [(File, "f") ; (Int, "length")];
+                body = []} (StringMap.add "readLine" { typ = String; fname = "readLine"; params = [(File, "f")];
+                body = []} (StringMap.add "appendString" { typ = Int; fname = "readLine"; params = [(String, "f") ; (String, "buf")];
+                body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
+                body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
+                body = []} StringMap.empty)))))))))))
         in
      
         (* Keep track of function declarations *)

@@ -20,8 +20,8 @@ let translate program =
       | A.String -> str_ptr_t
       | A.Void -> void_t
       | A.File -> str_ptr_t 
-  (*     | A.Dir -> raise (Failure ("not implemented yet")) *)
-  (*     | A.Array (_, _) -> raise (Failure ("not implemented yet")) *)
+      | A.Dir -> str_ptr_t 
+      | A.Array (_, _) -> raise (Failure ("not implemented yet"))
   in
 
   (* Utility function for getting a val from a map, given a key *)
@@ -39,11 +39,17 @@ let translate program =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
-  let fopen_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
-  let fopen_func = L.declare_function "open" fopen_t the_module in
+  let fopen_t = L.var_arg_function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
+  let fopen_func = L.declare_function "fopen" fopen_t the_module in
+
+  let dopen_t = L.function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
+  let dopen_func = L.declare_function "opendir" dopen_t the_module in
 
   let delete_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let delete_func = L.declare_function "remove" delete_t the_module in
+
+  let rmdir_t = L.function_type i32_t [| L.pointer_type i8_t |] in
+  let rmdir_func = L.declare_function "rmdir" rmdir_t the_module in
 
   let copy_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
   let copy_func = L.declare_function "copy" copy_t the_module in
@@ -51,8 +57,17 @@ let translate program =
   let move_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
   let move_func = L.declare_function "move" move_t the_module in
 
-  let write_t = L.function_type i32_t [| i32_t ; L.pointer_type i8_t |] in
+  let write_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
   let write_func = L.declare_function "bwrite" write_t the_module in
+
+  let appendstr_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+  let appendstr_func = L.declare_function "appendString" appendstr_t the_module in
+
+  let read_t = L.function_type (L.pointer_type i8_t) [| L.pointer_type i8_t ; i32_t |] in
+  let read_func = L.declare_function "bread" read_t the_module in
+
+  let readline_t = L.function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
+  let readline_func = L.declare_function "readLine" readline_t the_module in
 
   (* Build a map of function declarations *)
   let function_decls =
@@ -109,6 +124,7 @@ let translate program =
 	  | A.Neq     -> L.build_icmp L.Icmp.Ne
 	  | A.Lt    -> L.build_icmp L.Icmp.Slt
 	  | A.Gt -> L.build_icmp L.Icmp.Sgt
+          | A.Pipe -> raise (Failure ("not implemented yet"))
 	  ) e1' e2' "tmp" builder
       | A.Uop (_, _) -> raise (Failure ("not implemented yet"))
       | A.StringLit s -> 
@@ -135,7 +151,7 @@ let translate program =
                 ignore (L.build_br init_bb (snd mb)); 
                 
                 let pred_bb = L.append_block context "for" fdef in
-                pred_bb;
+                ignore(pred_bb);
 
                 let init = fstmt (fst mb, L.builder_at_end context init_bb) s1 in
                 add_terminal (snd init) (L.build_br pred_bb);
@@ -177,6 +193,9 @@ let translate program =
                   A.Int -> L.build_alloca i32_t n (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
+                | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
+                | A.Array (_, _) -> raise (Failure ("not implemented yet"))
+                | A.Void -> L.build_ret_void (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
       | A.VarDeclAsn (t, s, e) -> let init = 
@@ -184,6 +203,9 @@ let translate program =
                   A.Int -> L.build_alloca i32_t s (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t s (snd mb)
                 | A.File -> L.build_alloca str_ptr_t s (snd mb)
+                | A.Dir -> raise (Failure ("not implemented yet"))
+                | A.Array (_, _) -> raise (Failure ("not implemented yet"))
+                | A.Void -> L.build_ret_void (snd mb)
               ) in
               let m = (StringMap.add s init (fst mb)) in
               let e' = fexpr (m) (snd mb) e in
@@ -215,6 +237,7 @@ let translate program =
   (* Default format strings *)
   let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
   let str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
+  let fopen_mode = L.build_global_stringptr "r+" "mode" builder in
 
   (* Build statments inside of the main function *) 
   let build_stmts s =
@@ -226,13 +249,23 @@ let translate program =
               L.build_call printf_func [| int_format_str ; 
               (expr map builder e) |] "printf" builder
       | A.FuncCall ("fopen", [e]) ->
-                      L.build_call fopen_func [| (expr map builder e) ; L.const_int i32_t 2 |] "fopen" builder
+                      L.build_call fopen_func [| (expr map builder e) ; fopen_mode |] "fopen" builder
+      | A.FuncCall ("dopen", [e]) ->
+                      L.build_call dopen_func [| (expr map builder e) |] "dopen" builder
       | A.FuncCall ("delete", [e]) ->
 	  L.build_call delete_func [| (expr map builder e) |] "delete" builder
+      | A.FuncCall ("rmdir", [e]) ->
+	  L.build_call rmdir_func [| (expr map builder e) |] "rmdir" builder
       | A.FuncCall ("copy", [e1 ; e2]) ->
                       L.build_call copy_func [| (expr map builder e1) ; (expr map builder e2)|] "copy" builder
       | A.FuncCall ("write", [e1 ; e2]) ->
                       L.build_call write_func [| (expr map builder e1) ; (expr map builder e2)|] "write" builder
+      | A.FuncCall ("appendString", [e1 ; e2]) ->
+                      L.build_call appendstr_func [| (expr map builder e1) ; (expr map builder e2)|] "appendString" builder
+      | A.FuncCall ("read", [e1 ; e2]) ->
+                      L.build_call read_func [| (expr map builder e1) ; (expr map builder e2)|] "read" builder
+      | A.FuncCall ("readLine", [e1]) ->
+                      L.build_call readline_func [| (expr map builder e1) |] "readLine" builder
       | A.FuncCall ("move", [e1 ; e2]) ->
                       L.build_call move_func [| (expr map builder e1) ; (expr map builder e2)|] "move" builder
       | A.FuncCall ("prints", [e]) -> 
@@ -252,6 +285,7 @@ let translate program =
 	  | A.Neq     -> L.build_icmp L.Icmp.Ne
 	  | A.Lt    -> L.build_icmp L.Icmp.Slt
 	  | A.Gt -> L.build_icmp L.Icmp.Sgt
+          | A.Pipe -> raise (Failure ("not implemented yet"))
 	  ) e1' e2' "tmp" builder
       | A.Uop (op, e) -> 
                 let e' = expr map builder e in
@@ -284,7 +318,7 @@ let translate program =
                 ignore (L.build_br init_bb (snd mb)); 
                 
                 let pred_bb = L.append_block context "for" main_func in
-                pred_bb;
+                ignore(pred_bb);
 
                 let init = stmt (fst mb, L.builder_at_end context init_bb) s1 in
                 add_terminal (snd init) (L.build_br pred_bb);
@@ -324,6 +358,9 @@ let translate program =
                   A.Int -> L.build_alloca i32_t n (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
+                | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
+                | A.Array (_, _) -> raise (Failure ("not implemented yet"))
+                | A.Void -> L.build_ret_void (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
       | A.VarDeclAsn (t, s, e) -> let init = 
@@ -331,6 +368,9 @@ let translate program =
                   A.Int -> L.build_alloca i32_t s (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t s (snd mb)
                 | A.File -> L.build_alloca str_ptr_t s (snd mb)
+                | A.Dir -> L.build_alloca str_ptr_t s (snd mb)
+                | A.Array (_, _) -> raise (Failure ("not implemented yet"))
+                | A.Void -> L.build_ret_void (snd mb)
               ) in
               let m = (StringMap.add s init (fst mb)) in
               let e' = expr (m) (snd mb) e in
