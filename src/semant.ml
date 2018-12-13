@@ -38,7 +38,8 @@ let check ast =
         let built_in_decls =  StringMap.add "print"
                 { typ = Void; fname = "print"; params = [(Int, "x")];
                 body = [] } (StringMap.add "prints" { typ = Void; fname = "prints"; params = [(String, "x")];
-                body = []} StringMap.empty)
+                body = []} (StringMap.add "open" { typ = Int; fname = "printbig"; params = [(File, "x")];
+                body = []} StringMap.empty))
         in
      
         (* Keep track of function declarations *)

@@ -19,7 +19,7 @@ let translate program =
         A.Int -> i32_t
       | A.String -> str_ptr_t
       | A.Void -> void_t
-  (*     | A.File -> raise (Failure ("not implemented yet")) *)
+      | A.File -> str_ptr_t 
   (*     | A.Dir -> raise (Failure ("not implemented yet")) *)
   (*     | A.Array (_, _) -> raise (Failure ("not implemented yet")) *)
   in
@@ -38,6 +38,9 @@ let translate program =
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
+
+  let open_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let open_func = L.declare_function "open" open_t the_module in
 
   (* Build a map of function declarations *)
   let function_decls =
@@ -75,6 +78,8 @@ let translate program =
       | A.FuncCall ("print", [e]) -> 
               L.build_call printf_func [| int_format_str ; 
               (fexpr map builder e) |] "printf" builder
+      | A.FuncCall ("open", [e]) ->
+	  L.build_call open_func [| (fexpr map builder e) |] "open" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (fexpr map builder e) |] "printf" builder
@@ -159,12 +164,14 @@ let translate program =
               (match t with
                   A.Int -> L.build_alloca i32_t n (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
+                | A.File -> L.build_alloca str_ptr_t n (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
       | A.VarDeclAsn (t, s, e) -> let init = 
               (match t with
                   A.Int -> L.build_alloca i32_t s (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t s (snd mb)
+                | A.File -> L.build_alloca str_ptr_t s (snd mb)
               ) in
               let m = (StringMap.add s init (fst mb)) in
               let e' = fexpr (m) (snd mb) e in
@@ -183,7 +190,7 @@ let translate program =
 
 
 
-(* Declare main function *)
+  (* Declare main function *)
   let main_t = L.function_type i32_t [| |] in
   let main_func = L.define_function "main" main_t the_module in
 
@@ -206,6 +213,8 @@ let translate program =
       | A.FuncCall ("print", [e]) -> 
               L.build_call printf_func [| int_format_str ; 
               (expr map builder e) |] "printf" builder
+      | A.FuncCall ("open", [e]) ->
+	  L.build_call open_func [| (expr map builder e) |] "open" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (expr map builder e) |] "printf" builder
@@ -281,6 +290,7 @@ let translate program =
 	 let then_bb = L.append_block context "then" main_func in
 	 add_terminal (snd (stmt (fst mb, L.builder_at_end context then_bb) then_stmt))
 	   (L.build_br merge_bb);
+
 	 let else_bb = L.append_block context "else" main_func in
 	 add_terminal (snd (stmt (fst mb, L.builder_at_end context else_bb) else_stmt))
 	   (L.build_br merge_bb);
@@ -293,12 +303,14 @@ let translate program =
               (match t with
                   A.Int -> L.build_alloca i32_t n (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
+                | A.File -> L.build_alloca str_ptr_t n (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
       | A.VarDeclAsn (t, s, e) -> let init = 
               (match t with
                   A.Int -> L.build_alloca i32_t s (snd mb) 
                 | A.String -> L.build_alloca str_ptr_t s (snd mb)
+                | A.File -> L.build_alloca str_ptr_t s (snd mb)
               ) in
               let m = (StringMap.add s init (fst mb)) in
               let e' = expr (m) (snd mb) e in
