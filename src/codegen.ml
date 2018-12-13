@@ -281,7 +281,6 @@ let translate program =
 	 let then_bb = L.append_block context "then" main_func in
 	 add_terminal (snd (stmt (fst mb, L.builder_at_end context then_bb) then_stmt))
 	   (L.build_br merge_bb);
-
 	 let else_bb = L.append_block context "else" main_func in
 	 add_terminal (snd (stmt (fst mb, L.builder_at_end context else_bb) else_stmt))
 	   (L.build_br merge_bb);
