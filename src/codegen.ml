@@ -39,8 +39,11 @@ let translate program =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
-  let open_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
-  let open_func = L.declare_function "open" open_t the_module in
+  let fopen_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let fopen_func = L.declare_function "fopen" fopen_t the_module in
+
+  let delete_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  let delete_func = L.declare_function "remove" delete_t the_module in
 
   (* Build a map of function declarations *)
   let function_decls =
@@ -78,8 +81,8 @@ let translate program =
       | A.FuncCall ("print", [e]) -> 
               L.build_call printf_func [| int_format_str ; 
               (fexpr map builder e) |] "printf" builder
-      | A.FuncCall ("open", [e]) ->
-	  L.build_call open_func [| (fexpr map builder e) |] "open" builder
+      | A.FuncCall ("fopen", [e]) ->
+	  L.build_call fopen_func [| (fexpr map builder e) |] "fopen" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (fexpr map builder e) |] "printf" builder
@@ -213,8 +216,10 @@ let translate program =
       | A.FuncCall ("print", [e]) -> 
               L.build_call printf_func [| int_format_str ; 
               (expr map builder e) |] "printf" builder
-      | A.FuncCall ("open", [e]) ->
-	  L.build_call open_func [| (expr map builder e) |] "open" builder
+      | A.FuncCall ("fopen", [e]) ->
+	  L.build_call fopen_func [| (expr map builder e) |] "fopen" builder
+      | A.FuncCall ("delete", [e]) ->
+	  L.build_call delete_func [| (expr map builder e) |] "delete" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (expr map builder e) |] "printf" builder
