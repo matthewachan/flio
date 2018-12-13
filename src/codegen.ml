@@ -35,7 +35,7 @@ let translate program =
         Some _ -> ()
       | None -> ignore (f builder) in
 
-  (* Declare printf(), which the print built-in function will call *)
+  (* Declare built-in functions *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
@@ -44,6 +44,9 @@ let translate program =
 
   let delete_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let delete_func = L.declare_function "remove" delete_t the_module in
+
+  let copy_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+  let copy_func = L.declare_function "copy" copy_t the_module in
 
   (* Build a map of function declarations *)
   let function_decls =
@@ -220,6 +223,8 @@ let translate program =
 	  L.build_call fopen_func [| (expr map builder e) |] "fopen" builder
       | A.FuncCall ("delete", [e]) ->
 	  L.build_call delete_func [| (expr map builder e) |] "delete" builder
+      | A.FuncCall ("copy", [e1 ; e2]) ->
+                      L.build_call copy_func [| (expr map builder e1) ; (expr map builder e2)|] "copy" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (expr map builder e) |] "printf" builder

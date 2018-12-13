@@ -40,7 +40,8 @@ let check ast =
                 body = [] } (StringMap.add "prints" { typ = Void; fname = "prints"; params = [(String, "x")];
                 body = []} (StringMap.add "fopen" { typ = Int; fname = "fopen"; params = [(File, "x")];
                 body = []} (StringMap.add "delete" { typ = Int; fname = "delete"; params = [(File, "x")];
-                body = []} StringMap.empty)))
+                body = []} (StringMap.add "copy" { typ = Int; fname = "copy"; params = [(File, "src") ; (String, "dest")];
+                body = []} StringMap.empty))))
         in
      
         (* Keep track of function declarations *)
