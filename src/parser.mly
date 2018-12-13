@@ -152,6 +152,6 @@ typ:
   INT		{ Int }
 | STRING	{ String }
 | FILE		{ File }
-| PROC          { Proc }
 | DIR		{ Dir }
 | typ LBRACK INTLIT RBRACK { Array($1, $3) }
+| PROC LBRACK INTLIT RBRACK { Proc($3) }

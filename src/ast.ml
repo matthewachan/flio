@@ -7,7 +7,7 @@ type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or | Pipe
 
 type uoperator = Neg | Not
 
-type typ = Int | String | File | Dir | Proc | Array of typ * int | Void
+type typ = Int | String | File | Dir | Proc of int | Array of typ * int | Void
 
 (* Statements can be expressions or local var declarations *)
 type param = typ * string
@@ -77,8 +77,7 @@ let rec string_of_typ = function
 | Void -> "void"
 | String -> "string"
 | File -> "file"
-| Proc -> "proc"
-(* | Proc size -> "proc" ^ "[" ^ (string_of_int size) ^ "]" *)
+| Proc size -> "proc" ^ "[" ^ (string_of_int size) ^ "]"
 | Dir -> "dir"
 | Array(t, size) -> let t1 = string_of_typ t
 	in t1 ^ "[" ^ (string_of_int size) ^ "]"

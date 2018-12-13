@@ -48,8 +48,7 @@ let check ast =
                 body = []} (StringMap.add "appendString" { typ = Int; fname = "readLine"; params = [(String, "f") ; (String, "buf")];
                 body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
                 body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
-                body = []} (StringMap.add "pipeop" { typ = Void; fname = "pipeop"; params = [(Proc, "p1") ; (Proc, "p2")];
-                body = []} StringMap.empty))))))))))))
+                body = []} StringMap.empty)))))))))))
         in
      
         (* Keep track of function declarations *)
