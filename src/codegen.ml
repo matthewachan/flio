@@ -24,7 +24,7 @@ let translate program =
       | A.File -> str_ptr_t 
       | A.Dir -> str_ptr_t 
       | A.Array (_, s) -> str_arr_ptr_t s
-      | A.Proc s -> str_arr_ptr_t s
+      | A.Proc -> str_arr_ptr_t 1
   in
 
   (* Utility function for getting a val from a map, given a key *)
@@ -42,6 +42,9 @@ let translate program =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
+  let pipeop_t = L.var_arg_function_type i32_t [| (str_arr_ptr_t 1) ; (str_arr_ptr_t 1) |] in
+  let pipeop_func = L.declare_function "pipeop" pipeop_t the_module in
+  
   let fopen_t = L.var_arg_function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
   let fopen_func = L.declare_function "fopen" fopen_t the_module in
 
@@ -198,7 +201,7 @@ let translate program =
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
+                | A.Proc -> L.build_alloca (str_arr_ptr_t 1) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
@@ -208,7 +211,7 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> raise (Failure ("not implemented yet"))
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
+                | A.Proc -> L.build_alloca (str_arr_ptr_t 1) n (snd mb) 
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
@@ -364,7 +367,7 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
+                | A.Proc -> L.build_alloca (str_arr_ptr_t 1) n (snd mb) 
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
@@ -375,7 +378,7 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
+                | A.Proc -> L.build_alloca (str_arr_ptr_t 1) n (snd mb) 
                 | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
