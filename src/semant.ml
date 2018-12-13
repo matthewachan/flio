@@ -123,7 +123,8 @@ let check ast =
                                 " = " ^ string_of_typ rt ^ " in " ^ string_of_stmt ex))) ; map
                         | Expr e -> ignore(expr map e) ; map
                         | Return e -> ignore(expr map e) ; raise (Failure ("returns not allowed outside of function scope"))
-                        | For(s1, e, s2, s3) -> ignore(expr map e); ignore(stmt (stmt (stmt map s1) s2) s3) ; map
+                        | For(s1, e, s2, s3) -> let m = stmt map s1 in
+                                ignore(expr m e); ignore(stmt (stmt m s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
                         | Foreach(_, e, s) -> ignore(expr map e); ignore(stmt map s); map

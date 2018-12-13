@@ -224,7 +224,11 @@ let translate program =
 	  | A.Lt    -> L.build_icmp L.Icmp.Slt
 	  | A.Gt -> L.build_icmp L.Icmp.Sgt
 	  ) e1' e2' "tmp" builder
-      | A.Uop (_, _) -> raise (Failure ("not implemented yet"))
+      | A.Uop (op, e) -> 
+                let e' = expr map builder e in
+                (match op with
+                  A.Neg -> L.build_neg
+                | A.Not -> L.build_not) e' "tmp" builder
       | A.StringLit s -> 
               L.build_global_stringptr s "strptr" builder
       | A.Id s -> L.build_load (lookup s map) s builder 
@@ -258,7 +262,7 @@ let translate program =
 
                 (* Construct body basic block, and add s2 at the tail *)
                 let body_bb = L.append_block context "for_body" main_func in
-                let b = (stmt (fst mb, L.builder_at_end context body_bb) body) in
+                let b = (stmt (fst init, L.builder_at_end context body_bb) body) in
                 add_terminal (snd (stmt b s2)) (L.build_br pred_bb);
 
                 (* Do initialization before checking the predicate e *)
@@ -285,6 +289,7 @@ let translate program =
 	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
 	  (fst mb, L.builder_at_end context merge_bb)
       | A.Elif (_, _) -> raise (Failure ("not implemented yet"))
+      | A.Return _ -> raise (Failure ("returns are not allowed in main"))
       | A.VarDecl (t, n) -> let init = 
               (match t with
                   A.Int -> L.build_alloca i32_t n (snd mb) 
