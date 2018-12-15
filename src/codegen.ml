@@ -175,7 +175,6 @@ let translate program =
                 let merge_bb = L.append_block context "merge" fdef in
                 ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
                 (fst mb, L.builder_at_end context merge_bb)
-      | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.If (p, then_stmt, else_stmt) -> 
          let bool_val = fexpr (fst mb) builder p in
 	 let merge_bb = L.append_block context "merge" fdef in
@@ -349,7 +348,6 @@ let translate program =
                 let merge_bb = L.append_block context "merge" main_func in
                 ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
                 (fst mb, L.builder_at_end context merge_bb)
-      | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.If (p, then_stmt, else_stmt) -> 
          let bool_val = (snd (expr (fst mb) builder p)) in
 	 let merge_bb = L.append_block context "merge" main_func in

@@ -33,7 +33,6 @@ type stmt =
 | Asn of string * expr
 | Return of expr
 | For of  stmt * expr * stmt * stmt
-| Foreach of expr * expr * stmt
 | If of expr * stmt * stmt
 
 
@@ -103,8 +102,6 @@ let rec string_of_stmt = function
 | For(s1, e, s2, s3) ->
       "for (" ^ string_of_stmt s1  ^ " ; " ^ string_of_expr e ^ " ; " ^
       string_of_stmt s2  ^ ";) " ^ string_of_stmt s3
-| Foreach(e1, e2, s) -> 
-        "foreach " ^ string_of_expr e1 ^ " in " ^ string_of_expr e2 ^ string_of_stmt s
 | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
 | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
         string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2

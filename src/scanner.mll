@@ -18,7 +18,6 @@ rule token = parse
 | "return"	{ RETURN }
 (* Loops and conditionals *)
 | "for"		{ FOR }
-| "foreach"	{ FOREACH }
 | "in"		{ IN }
 | "if"		{ IF }
 | "else"	{ ELSE }

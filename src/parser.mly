@@ -10,7 +10,7 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGNMENT PIPE
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
-%token FOR FOREACH IN IF ELSE
+%token FOR IN IF ELSE
 %token <int> INTLIT
 %token <string> STRINGLIT
 %token <string> ID
@@ -86,7 +86,6 @@ stmt:
 | RETURN SEQUENCING								{ Return(Noexpr) }
 | LBRACE stmt_list RBRACE							{ Block(List.rev $2) }
 | FOR LPAREN stmt_opt expr_opt SEQUENCING stmt_opt RPAREN stmt 			{ For($3, $4, $6, $8) }
-| FOREACH expr IN expr stmt							{ Foreach($2, $4, $5) }
 | IF LPAREN expr RPAREN stmt %prec NOELSE					{ If($3, $5, Block([])) }
 | IF LPAREN expr RPAREN stmt ELSE stmt 						{ If($3, $5, $7) }
 

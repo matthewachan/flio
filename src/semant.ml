@@ -142,7 +142,6 @@ let check ast =
                                 ignore(expr m e); ignore(stmt (stmt m s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                        | Foreach(_, e, s) -> ignore(expr map e); ignore(stmt map s); map
                 in ignore(stmt symbols (Block s))
 
         in
@@ -185,7 +184,6 @@ let check ast =
                         | For(s1, e, s2, s3) -> ignore(expr map e); ignore(stmt (stmt (stmt map s1) s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                        | Foreach(e1, e2, s) -> ignore(expr map e1); ignore(expr map e2); ignore(stmt map s); map
 
                 in ignore(stmt symbols (Block func.body))
 
