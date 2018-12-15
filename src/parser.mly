@@ -7,7 +7,7 @@
 
 %token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
 %token INT STRING FILE DIR PROC
-%token PLUS MINUS TIMES DIVIDE ASSIGNMENT PIPE
+%token PLUS MINUS TIMES DIVIDE ASSIGNMENT
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
 %token FOR IN IF ELSE
@@ -26,7 +26,6 @@
 %left LT GT 
 %left PLUS MINUS
 %left TIMES DIVIDE
-%left PIPE
 %right NOT NEG
 
 %start program
@@ -106,7 +105,6 @@ expr_opt:
 | expr		{ $1 }
 
 expr:
-  expr PIPE expr                        { Binop($1, Pipe, $3) }
 | INTLIT				{ IntLit($1) }
 | STRINGLIT				{ StringLit($1) }
 | ID					{ Id($1) }

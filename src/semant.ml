@@ -71,12 +71,7 @@ let check ast =
                   IntLit _ -> Int
                 | StringLit _ -> String
                 | ArrLit a -> Array(expr map (List.hd a), List.length a)
-                | Id s -> let t = type_of_identifier s map in 
-                        (match t with 
-                          Proc x -> Proc 5
-                        | y -> y
-                        )
-
+                | Id s -> let t = type_of_identifier s map in t
                 | Noexpr -> Void
                 | Uop(op, e) as ex -> let t = expr map e in
                         (match op with
@@ -101,7 +96,6 @@ let check ast =
                         | Eq | Neq when t1 = t2 -> Int
                         | Lt | Gt when t1 = Int && t2 = Int -> Int
                         | And | Or when t1 = Int && t2 = Int -> Int
-                        | Pipe when t1 = Proc(5) && t2 = Proc(5) -> Proc (5)
                         | _ -> raise (Failure ("illegal binary operator " ^ 
                                 string_of_typ t1 ^ " " ^ string_of_op op ^
                                 " " ^ string_of_typ t2 ^ " in " ^ string_of_expr e))

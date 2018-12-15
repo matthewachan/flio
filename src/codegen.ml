@@ -12,7 +12,6 @@ let translate program =
     and i8_t = L.i8_type context
     and str_ptr_t = L.pointer_type (L.i8_type context)
     and str_arr_ptr_t n = L.array_type (L.pointer_type (L.i8_type context)) n
-    and double_ptr_t = L.pointer_type (L.pointer_type (L.i8_type context))
     and void_t = L.void_type context 
   in       
 
@@ -42,9 +41,6 @@ let translate program =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
   
-  let pipeop_t s1 s2 = L.function_type i32_t [| (str_arr_ptr_t s1) ; (str_arr_ptr_t s2) |] in
-  let pipeop_func s1 s2 = L.declare_function "pipeop" (pipeop_t s1 s2) the_module in
-
   let fopen_t = L.var_arg_function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
   let fopen_func = L.declare_function "fopen" fopen_t the_module in
 
@@ -130,7 +126,6 @@ let translate program =
 	  | A.Neq     -> L.build_icmp L.Icmp.Ne
 	  | A.Lt    -> L.build_icmp L.Icmp.Slt
 	  | A.Gt -> L.build_icmp L.Icmp.Sgt
-          | A.Pipe -> raise (Failure ("not implemented yet"))
 	  ) e1' e2' "tmp" builder
       | A.Uop (_, _) -> raise (Failure ("not implemented yet"))
       | A.StringLit s -> 
@@ -280,12 +275,7 @@ let translate program =
       | A.Binop (e1, op, e2) -> 
 	  let e1' = (expr map builder e1)
 	  and e2' = (expr map builder e2) in
-	  (match op with
-            A.Pipe -> 
-                    let len1 = L.array_length (fst e1') in
-                    let len2 = L.array_length (fst e2') in
-                    (void_t, L.build_call (pipeop_func len1 len2) [| (snd e1') ; (snd e2') |] "pipeop" builder) 
-          | binop -> (void_t, (match binop with
+	  (void_t, (match op with
                     A.Add     -> L.build_add
                   | A.Sub     -> L.build_sub
                   | A.Mul    -> L.build_mul
@@ -296,8 +286,7 @@ let translate program =
                   | A.Neq     -> L.build_icmp L.Icmp.Ne
                   | A.Lt    -> L.build_icmp L.Icmp.Slt
                   | A.Gt -> L.build_icmp L.Icmp.Sgt
-                  ) (snd e1') (snd e2') "tmp" builder)
-          )
+          ) (snd e1') (snd e2') "tmp" builder)
       | A.Uop (op, e) -> 
                 let e' = (snd (expr map builder e)) in
                 (void_t, 

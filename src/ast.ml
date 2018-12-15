@@ -3,7 +3,7 @@
   Author: Matthew Chan
 *)
 
-type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or | Pipe
+type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
 
 type uoperator = Neg | Not
 
@@ -62,7 +62,6 @@ let string_of_op = function
 | Gt -> ">"
 | And -> "and"
 | Or -> "or"
-| Pipe -> "|>"
 
 let string_of_uop = function
   Neg -> "-"
