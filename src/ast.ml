@@ -7,7 +7,7 @@ type operator = Add | Sub | Mul | Div | Gt | Lt | Eq | Neq | And | Or
 
 type uoperator = Neg | Not
 
-type typ = Int | String | File | Dir | Proc of int | Array of typ * int | Void
+type typ = Int | String | File | Dir | Void
 
 (* Statements can be expressions or local var declarations *)
 type param = typ * string
@@ -19,10 +19,8 @@ type expr =
 | Uop of uoperator * expr
 | IntLit of int
 | StringLit of string
-| ArrLit of expr list
 | Id of string
 | FuncCall of string * expr list
-| ArrAccess of string * expr
 
 type stmt = 
   Nostmt
@@ -67,15 +65,12 @@ let string_of_uop = function
   Neg -> "-"
 | Not -> "!"
 
-let rec string_of_typ = function
+let string_of_typ = function
   Int -> "int"
 | Void -> "void"
 | String -> "string"
 | File -> "file"
-| Proc size -> "proc" ^ "[" ^ (string_of_int size) ^ "]"
 | Dir -> "dir"
-| Array(t, size) -> let t1 = string_of_typ t
-	in t1 ^ "[" ^ (string_of_int size) ^ "]"
 
 let rec string_of_expr = function
   IntLit(l) -> string_of_int l
@@ -84,9 +79,6 @@ let rec string_of_expr = function
 | Binop(e1, op, e2) -> let lhs = string_of_expr e1 and rhs = string_of_expr e2 in
 	(lhs ^ " " ^ string_of_op op ^ " " ^ rhs)
 | Uop(op, e) -> string_of_uop op ^ string_of_expr e
-| ArrLit(e) -> "{" ^ String.concat ", " (List.map string_of_expr e) ^ "}"
-| ArrAccess(id, e) -> let idx = string_of_expr e in
-	(id ^ "[" ^ idx ^ "]")
 | FuncCall(f, args) -> f ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
 | Noexpr -> ""
 

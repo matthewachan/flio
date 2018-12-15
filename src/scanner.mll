@@ -12,7 +12,6 @@ rule token = parse
 | "string"	{ STRING }
 | "file"	{ FILE }
 | "dir"		{ DIR }
-| "proc"        { PROC }
 (* Function keywords *)
 | "def"		{ DEF }
 | "return"	{ RETURN }

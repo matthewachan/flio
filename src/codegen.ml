@@ -11,7 +11,6 @@ let translate program =
     and i32_t = L.i32_type context
     and i8_t = L.i8_type context
     and str_ptr_t = L.pointer_type (L.i8_type context)
-    and str_arr_ptr_t n = L.array_type (L.pointer_type (L.i8_type context)) n
     and void_t = L.void_type context 
   in       
 
@@ -22,8 +21,6 @@ let translate program =
       | A.Void -> void_t
       | A.File -> str_ptr_t 
       | A.Dir -> str_ptr_t 
-      | A.Array (_, s) -> str_arr_ptr_t s
-      | A.Proc s -> str_arr_ptr_t s
   in
 
   (* Utility function for getting a val from a map, given a key *)
@@ -138,8 +135,6 @@ let translate program =
                   A.Void -> ""
                   | _ -> f ^ "_result") in
                 L.build_call fdef (Array.of_list actuals) result builder
-      | A.ArrAccess (_, _) -> raise (Failure ("not implemented yet"))
-      | A.ArrLit _ -> raise (Failure ("not implemented yet"))
     in
 
     let rec fstmt mb = function
@@ -193,8 +188,6 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
@@ -204,8 +197,6 @@ let translate program =
                 | A.String -> L.build_alloca str_ptr_t n (snd mb)
                 | A.File -> L.build_alloca str_ptr_t n (snd mb)
                 | A.Dir -> raise (Failure ("not implemented yet"))
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
                 | A.Void -> L.build_ret_void (snd mb)
               ) in
               let m = (StringMap.add n init (fst mb)) in
@@ -303,8 +294,6 @@ let translate program =
                   A.Void -> ""
                   | _ -> f ^ "_result") in
                 (void_t, L.build_call fdef (Array.of_list actuals) result builder)
-      | A.ArrAccess (_, _) -> raise (Failure ("not implemented yet"))
-      | A.ArrLit el -> (void_t, L.const_array str_ptr_t  (Array.of_list (List.map snd (List.map (expr map builder) (List.rev el)))))
     in
 
     (* Build the code for the given statement; return the StringMap and builder 
@@ -358,8 +347,6 @@ let translate program =
                 | A.String -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
                 | A.File -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
                 | A.Dir -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
-                | A.Proc s -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
-                | A.Array (_, s) -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
                 | A.Void -> (void_t, L.build_ret_void (snd mb))
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
@@ -369,8 +356,6 @@ let translate program =
                 | A.String -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
                 | A.File -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
                 | A.Dir -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
-                | A.Proc s -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
-                | A.Array (_, s) -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
                 | A.Void -> (void_t, L.build_ret_void (snd mb))
               ) in
               let m = (StringMap.add n init (fst mb)) in

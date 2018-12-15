@@ -6,7 +6,7 @@
 %{ open Ast %}
 
 %token EOF LBRACE RBRACE LPAREN RPAREN LBRACK RBRACK COMMA SEQUENCING
-%token INT STRING FILE DIR PROC
+%token INT STRING FILE DIR
 %token PLUS MINUS TIMES DIVIDE ASSIGNMENT
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
@@ -56,10 +56,6 @@ paramlist:
 | paramlist COMMA typ ID 	{ ($3, $4) :: $1}
 
 
-/* Arrays */
-array_lit:
-  LBRACE args RBRACE	{ ArrLit($2) }
-
 args:
 		{ [] }
 | arglist	{ List.rev $1 }
@@ -91,12 +87,10 @@ stmt:
 vdecl_stmt:
   typ ID SEQUENCING				{ VarDecl($1, $2) }
 | typ ID ASSIGNMENT expr SEQUENCING		{ VarDeclAsn($1, $2, $4) }
-| typ ID ASSIGNMENT array_lit SEQUENCING 	{ VarDeclAsn($1, $2, $4) }
 
 
 asn_stmt:
   ID ASSIGNMENT expr SEQUENCING							{ Asn($1, $3) }
-| ID ASSIGNMENT array_lit SEQUENCING						{ Asn($1, $3) }
 | ID LBRACK expr RBRACK ASSIGNMENT expr	SEQUENCING				{ Asn($1, $3) }
 
 /* Expressions */
@@ -109,7 +103,6 @@ expr:
 | STRINGLIT				{ StringLit($1) }
 | ID					{ Id($1) }
 | ID LPAREN args RPAREN	%prec CALL	{ FuncCall($1, $3) }
-| ID LBRACK expr RBRACK			{ ArrAccess($1, $3) }
 | expr PLUS  expr			{ Binop($1, Add, $3) }
 | expr MINUS expr			{ Binop($1, Sub, $3) }
 | expr TIMES expr			{ Binop($1, Mul, $3) }
@@ -133,5 +126,3 @@ typ:
 | STRING	{ String }
 | FILE		{ File }
 | DIR		{ Dir }
-| typ LBRACK INTLIT RBRACK { Array($1, $3) }
-| PROC LBRACK INTLIT RBRACK { Proc($3) }

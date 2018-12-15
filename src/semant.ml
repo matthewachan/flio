@@ -70,7 +70,6 @@ let check ast =
         let rec expr map = function
                   IntLit _ -> Int
                 | StringLit _ -> String
-                | ArrLit a -> Array(expr map (List.hd a), List.length a)
                 | Id s -> let t = type_of_identifier s map in t
                 | Noexpr -> Void
                 | Uop(op, e) as ex -> let t = expr map e in
@@ -80,7 +79,6 @@ let check ast =
                         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex))
                         )
-                | ArrAccess(n, _) -> type_of_identifier n map
                 | FuncCall(f, args) as call -> let fd = function_decl f in 
                         if List.length args != List.length fd.params then
                                 raise (Failure ("expecting " ^ string_of_int
