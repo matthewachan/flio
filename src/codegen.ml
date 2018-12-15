@@ -37,6 +37,9 @@ let translate program =
   (* Declare built-in functions *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
+
+  let concat_t = L.function_type (L.pointer_type i8_t) [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+  let concat_func = L.declare_function "concat" concat_t the_module in
   
   let fopen_t = L.var_arg_function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
   let fopen_func = L.declare_function "fopen" fopen_t the_module in
@@ -240,6 +243,9 @@ let translate program =
       | A.FuncCall ("print", [e]) -> 
               (void_t, L.build_call printf_func [| int_format_str ; 
               (snd (expr map builder e)) |] "printf" builder)
+      | A.FuncCall ("concat", [s1 ; s2]) -> 
+              (void_t, L.build_call concat_func [| (snd (expr map builder s1)) ; 
+              (snd (expr map builder s2)) |] "concat" builder)
       | A.FuncCall ("fopen", [e]) ->
                      (void_t,  L.build_call fopen_func [| (snd (expr map builder e)) ; fopen_mode |] "fopen" builder)
       | A.FuncCall ("dopen", [e]) ->

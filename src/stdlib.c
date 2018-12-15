@@ -69,13 +69,6 @@ char *readLine(FILE *f)
 	return bread(f, 200);	
 }
 
-int pipeop(char **p1, char **p2)
-{
-	printf("%s\n", p1[0]);
-	/* printf("hi\n"); */
-	return 0;
-}
-
 int appendString(const char *f, const char *buf)
 {
 	
@@ -83,6 +76,14 @@ int appendString(const char *f, const char *buf)
 	int ret = bwrite(file, buf);
 	fclose(file);
 	return ret;
+}
+
+char *concat(const char *s1, const char *s2)
+{
+	char *c = malloc(strlen(s1) + strlen(s2) + 1);
+	strcpy(c, s1);
+	strcat(c, s2);
+	return c;
 }
 
 #ifdef DEBUG
@@ -96,8 +97,6 @@ int main(int argc, char **argv)
 	/* char *s; */
 	/* size_t len; */
 	/* getline(&s, &len, fd); */
-	char *p1[] = {"/bin/ls"};
-	char *p2[] = {"head"};
 	
 	/* printf("%s", readLine(f)); */
 	return 0;

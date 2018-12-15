@@ -48,7 +48,8 @@ let check ast =
                 body = []} (StringMap.add "appendString" { typ = Int; fname = "readLine"; params = [(String, "f") ; (String, "buf")];
                 body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
                 body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
-                body = []} StringMap.empty)))))))))))
+                body = []} (StringMap.add "concat" { typ = String; fname = "rmdir"; params = [(String, "s1") ; (String, "s2")];
+                body = []} StringMap.empty))))))))))))
         in
      
         (* Keep track of function declarations *)
