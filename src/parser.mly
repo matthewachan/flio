@@ -11,7 +11,6 @@
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
 %token DOT
-%token IMPORT
 %token FOR FOREACH IN IF ELIF ELSE
 %token <int> INTLIT
 %token <string> STRINGLIT
@@ -40,17 +39,13 @@
 
 /* { funcs: [<fdecl>]; stmts: [<stmt>] } */
 program:
-        decls EOF { {imports = $1.imports; funcs = $1.funcs; stmts = List.rev $1.stmts} }
+        decls EOF { {funcs = $1.funcs; stmts = List.rev $1.stmts} }
 
 decls:
- 		{ {imports = []; funcs = []; stmts = []} }
-| decls import	{ {imports = ($2 :: $1.imports); funcs = $1.funcs; stmts = $1.stmts} }
-| decls fdecl	{ {imports = $1.imports; funcs = ($2 :: $1.funcs); stmts = $1.stmts} }
-| decls stmt	{ {imports = $1.imports; funcs = $1.funcs; stmts = ($2 :: $1.stmts)} }
+ 		{ {funcs = []; stmts = []} }
+| decls fdecl	{ {funcs = ($2 :: $1.funcs); stmts = $1.stmts} }
+| decls stmt	{ {funcs = $1.funcs; stmts = ($2 :: $1.stmts)} }
 
-/* Imports */
-import:
-  IMPORT STRINGLIT	{ $2 }
 
 /* Function declaration / definition */
 fdecl:

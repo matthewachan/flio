@@ -24,7 +24,6 @@ rule token = parse
 | "elif"	{ ELIF }
 | "else"	{ ELSE }
 (* Misc *)
-| "import"	{ IMPORT }
 | "//"		{ comment lexbuf }
 | '('		{ LPAREN }
 | ')'		{ RPAREN }

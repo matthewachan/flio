@@ -37,7 +37,6 @@ type stmt =
 | If of expr * stmt * stmt
 | Elif of expr list * stmt list
 
-type import = string
 
 (* Functions have a return type, name, argument list, and body of statements *)
 type fdecl = {
@@ -47,11 +46,10 @@ type fdecl = {
 	body: stmt list;
 }
 
-(* Program is composed of functions, statements and imports *)
+(* Program is composed of functions and statements *)
 type program = {
 	funcs: fdecl list;
 	stmts: stmt list;
-	imports: import list;
 }
 
 (* Pretty printing functions *)
@@ -126,9 +124,7 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-let string_of_import import = "import " ^ import
 
 let string_of_program program =
-  String.concat "\n" (List.map string_of_import program.imports) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl program.funcs) ^ "\n" ^
   String.concat "\n" (List.map string_of_stmt program.stmts)
