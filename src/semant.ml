@@ -48,8 +48,7 @@ let check ast =
                 body = []} (StringMap.add "appendString" { typ = Int; fname = "readLine"; params = [(String, "f") ; (String, "buf")];
                 body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
                 body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
-                body = []} (StringMap.add "pipeop" { typ = Void; fname = "pipeop"; params = [(Proc 5, "p1") ; (Proc 5, "p2")];
-                body = []} StringMap.empty))))))))))))
+                body = []} StringMap.empty)))))))))))
         in
      
         (* Keep track of function declarations *)
@@ -144,8 +143,6 @@ let check ast =
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
                         | Foreach(_, e, s) -> ignore(expr map e); ignore(stmt map s); map
-                        | Elif(exprs, stmts) -> let check_e e = ignore(expr map e) and check_s s = ignore(stmt map s) in
-                                List.iter check_e exprs; List.iter check_s stmts; map
                 in ignore(stmt symbols (Block s))
 
         in
@@ -189,8 +186,6 @@ let check ast =
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
                         | Foreach(e1, e2, s) -> ignore(expr map e1); ignore(expr map e2); ignore(stmt map s); map
-                        | Elif(exprs, stmts) -> let check_e e = ignore(expr map e) and check_s s = ignore(stmt map s) in
-                List.iter check_e exprs; List.iter check_s stmts; map
 
                 in ignore(stmt symbols (Block func.body))
 
