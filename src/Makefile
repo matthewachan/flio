@@ -15,6 +15,7 @@ clean:
 	rm -rf scanner.ml parser.ml parser.mlii flio
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf testall.log *.diff *.err *.ll
+	rm -rf *.exe *s *.out
 
 TESTS = decl hello hello2 number loop
 

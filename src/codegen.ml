@@ -91,6 +91,7 @@ let translate program =
     (* Default format strings *)
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
     let str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
+    let fopen_mode = L.build_global_stringptr "r+" "mode" builder in
 
     (* The function's local variables are initially the function args *)
     let add_formal m (t, n) p = L.set_value_name n p;
@@ -107,8 +108,29 @@ let translate program =
       | A.FuncCall ("print", [e]) -> 
               L.build_call printf_func [| int_format_str ; 
               (fexpr map builder e) |] "printf" builder
+      | A.FuncCall ("concat", [s1 ; s2]) -> 
+              L.build_call concat_func [| (fexpr map builder s1) ; 
+              (fexpr map builder s2) |] "concat" builder
       | A.FuncCall ("fopen", [e]) ->
-	  L.build_call fopen_func [| (fexpr map builder e) |] "fopen" builder
+                     L.build_call fopen_func [| (fexpr map builder e) ; fopen_mode |] "fopen" builder
+      | A.FuncCall ("dopen", [e]) ->
+                      L.build_call dopen_func [| (fexpr map builder e) |] "dopen" builder
+      | A.FuncCall ("delete", [e]) ->
+	  L.build_call delete_func [| (fexpr map builder e) |] "delete" builder
+      | A.FuncCall ("rmdir", [e]) ->
+	  L.build_call rmdir_func [| (fexpr map builder e) |] "rmdir" builder
+      | A.FuncCall ("copy", [e1 ; e2]) ->
+                      L.build_call copy_func [| (fexpr map builder e1) ; (fexpr map builder e2)|] "copy" builder
+      | A.FuncCall ("write", [e1 ; e2]) ->
+                      L.build_call write_func [| (fexpr map builder e1) ; (fexpr map builder e2)|] "write" builder
+      | A.FuncCall ("appendString", [e1 ; e2]) ->
+                      L.build_call appendstr_func [| (fexpr map builder e1) ; (fexpr map builder e2)|] "appendString" builder
+      | A.FuncCall ("read", [e1 ; e2]) ->
+                      L.build_call read_func [| (fexpr map builder e1) ; (fexpr map builder e2)|] "read" builder
+      | A.FuncCall ("readLine", [e1]) ->
+                      L.build_call readline_func [| (fexpr map builder e1) |] "readLine" builder
+      | A.FuncCall ("move", [e1 ; e2]) ->
+                      L.build_call move_func [| (fexpr map builder e1) ; (fexpr map builder e2)|] "move" builder
       | A.FuncCall ("prints", [e]) -> 
               L.build_call printf_func [| str_format_str; 
               (fexpr map builder e) |] "printf" builder
@@ -169,7 +191,7 @@ let translate program =
                 ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
                 (fst mb, L.builder_at_end context merge_bb)
       | A.If (p, then_stmt, else_stmt) -> 
-         let bool_val = fexpr (fst mb) builder p in
+         let bool_val = fexpr (fst mb) (snd mb) p in
 	 let merge_bb = L.append_block context "merge" fdef in
 
 	 let then_bb = L.append_block context "then" fdef in
@@ -180,7 +202,7 @@ let translate program =
 	 add_terminal (snd (fstmt (fst mb, L.builder_at_end context else_bb) else_stmt))
 	   (L.build_br merge_bb);
 
-	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+	 ignore (L.build_cond_br bool_val then_bb else_bb (snd mb));
 	  (fst mb, L.builder_at_end context merge_bb)
       | A.Return e -> ignore(match fdecl.A.typ with
                   A.Void -> L.build_ret_void (snd mb)
@@ -333,7 +355,7 @@ let translate program =
                 ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
                 (fst mb, L.builder_at_end context merge_bb)
       | A.If (p, then_stmt, else_stmt) -> 
-         let bool_val = (snd (expr (fst mb) builder p)) in
+         let bool_val = (snd (expr (fst mb) (snd mb) p)) in
 	 let merge_bb = L.append_block context "merge" main_func in
 
 	 let then_bb = L.append_block context "then" main_func in
@@ -344,7 +366,7 @@ let translate program =
 	 add_terminal (snd (stmt (fst mb, L.builder_at_end context else_bb) else_stmt))
 	   (L.build_br merge_bb);
 
-	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+	 ignore (L.build_cond_br bool_val then_bb else_bb (snd mb));
 	  (fst mb, L.builder_at_end context merge_bb)
       | A.Return _ -> raise (Failure ("returns are not allowed in main"))
       | A.VarDecl (t, n) -> let init = 

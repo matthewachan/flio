@@ -8,6 +8,12 @@
 LLI="lli"
 #LLI="/usr/local/opt/llvm/bin/lli"
 
+# Path to the LLVM compiler
+LLC="llc"
+
+# Path to the C compiler
+CC="cc"
+
 FLIO="./flio.native"
 #flio="_build/flio.native"
 
@@ -71,8 +77,8 @@ RunFail() {
 Check() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.f//'`
-    reffile=`echo $1 | sed 's/.f$//'`
+                             s/\.f//'`
+    reffile=`echo $1 | sed 's/\.f$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -84,7 +90,9 @@ Check() {
 
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
     Run "$FLIO" "<" $1 ">" "${basename}.ll" &&
-    Run "$LLI" "${basename}.ll" ">" "${basename}.out" &&
+    Run "$LLC" "-relocation-model=pic" "${basename}.ll" ">" "${basename}.s" &&
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "../src/stdlib.o" &&
+    Run "./${basename}.exe" > "${basename}.out" &&
     Compare ${basename}.out ${basename}.out ${basename}.diff
 
     # Report the status and clean up the generated files
@@ -104,8 +112,8 @@ Check() {
 CheckFail() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.f//'`
-    reffile=`echo $1 | sed 's/.f$//'`
+                             s/\.f//'`
+    reffile=`echo $1 | sed 's/\.f$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -154,12 +162,18 @@ LLIFail() {
 
 which "$LLI" >> $globallog || LLIFail
 
+# if [ ! -f stlib.o ]
+# then
+#     echo "Could not find stdlib.o"
+#     echo "Try \"make stdlib.o\""
+#     exit 1
+# fi
 
 if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="test_suite/test-*.f test_suite/fail-*.f"
+    files="../test/test-*.f ../test/fail-*.f"
 fi
 
 for file in $files

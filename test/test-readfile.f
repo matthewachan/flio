@@ -3,4 +3,4 @@ file f = filename;
 
 appendString(filename, 'hola mundo!');
 prints(readLine(f));
-remove(filename);
+delete(filename);

@@ -4,5 +4,5 @@ file f = filename;
 
 copy(filename, copyname);
 
-remove(filename);
-remove(copyname);
+delete(filename);
+delete(copyname);

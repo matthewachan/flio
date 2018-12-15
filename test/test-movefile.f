@@ -4,4 +4,4 @@ file f = filename;
 
 move(filename, newname);
 
-remove(newname);
+delete(newname);

@@ -1,4 +1,5 @@
 def filefun() file
 {
-prints('Funcs can return a file type');
+        file f = fopen('myfile.txt');
+        return f;
 }
