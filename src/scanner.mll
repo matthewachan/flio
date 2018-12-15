@@ -33,7 +33,6 @@ rule token = parse
 | ','		{ COMMA }
 | ';'		{ SEQUENCING } 
 (* Operators *)
-| '.'		{ DOT }
 | '+'		{ PLUS }
 | '-'		{ MINUS }
 | '*'		{ TIMES }

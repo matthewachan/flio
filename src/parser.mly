@@ -10,7 +10,6 @@
 %token PLUS MINUS TIMES DIVIDE ASSIGNMENT PIPE
 %token GT LT EQ NEQ NOT AND OR
 %token DEF RETURN
-%token DOT
 %token FOR FOREACH IN IF ELSE
 %token <int> INTLIT
 %token <string> STRINGLIT
@@ -29,7 +28,6 @@
 %left TIMES DIVIDE
 %left PIPE
 %right NOT NEG
-%left DOT
 
 %start program
 %type <Ast.program> program
