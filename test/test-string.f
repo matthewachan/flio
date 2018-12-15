@@ -1,0 +1,2 @@
+'hi';
+string s = 'there';
