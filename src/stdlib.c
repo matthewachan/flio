@@ -69,6 +69,13 @@ char *readLine(FILE *f)
 	return bread(f, 200);	
 }
 
+int pipeop(char **p1, char **p2)
+{
+	printf("%s\n", p1[0]);
+	/* printf("hi\n"); */
+	return 0;
+}
+
 int appendString(const char *f, const char *buf)
 {
 	
@@ -83,14 +90,16 @@ int main(int argc, char **argv)
 {
 	/* copy("./test.txt", "./test2.txt"); */
 	/* move("./test.txt", "./test3.txt"); */
-	FILE *f = fopen("test3.txt", "r+");
+	/* FILE *f = fopen("test3.txt", "r+"); */
 	/* bwrite(fd, "hi there"); */
 	/* char *s = bread(fd, 2); */
 	/* char *s; */
 	/* size_t len; */
 	/* getline(&s, &len, fd); */
+	char *p1[] = {"/bin/ls"};
+	char *p2[] = {"head"};
 	
-	printf("%s", readLine(f));
+	/* printf("%s", readLine(f)); */
 	return 0;
 }
 #endif

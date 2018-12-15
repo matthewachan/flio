@@ -41,6 +41,9 @@ let translate program =
   (* Declare built-in functions *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
+  
+  let pipeop_t s1 s2 = L.function_type i32_t [| (str_arr_ptr_t s1) ; (str_arr_ptr_t s2) |] in
+  let pipeop_func s1 s2 = L.declare_function "pipeop" (pipeop_t s1 s2) the_module in
 
   let fopen_t = L.var_arg_function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
   let fopen_func = L.declare_function "fopen" fopen_t the_module in
@@ -248,74 +251,80 @@ let translate program =
   let build_stmts s =
     (* Construct code for an expression; return its value *)
     let rec expr map builder = function
-        A.IntLit i -> L.const_int i32_t i
-      | A.Noexpr -> L.const_int i32_t 0
+        A.IntLit i -> (void_t, L.const_int i32_t i)
+      | A.Noexpr -> (void_t, L.const_int i32_t 0)
       | A.FuncCall ("print", [e]) -> 
-              L.build_call printf_func [| int_format_str ; 
-              (expr map builder e) |] "printf" builder
+              (void_t, L.build_call printf_func [| int_format_str ; 
+              (snd (expr map builder e)) |] "printf" builder)
       | A.FuncCall ("fopen", [e]) ->
-                      L.build_call fopen_func [| (expr map builder e) ; fopen_mode |] "fopen" builder
+                     (void_t,  L.build_call fopen_func [| (snd (expr map builder e)) ; fopen_mode |] "fopen" builder)
       | A.FuncCall ("dopen", [e]) ->
-                      L.build_call dopen_func [| (expr map builder e) |] "dopen" builder
+                      (void_t, L.build_call dopen_func [| (snd (expr map builder e)) |] "dopen" builder)
       | A.FuncCall ("delete", [e]) ->
-	  L.build_call delete_func [| (expr map builder e) |] "delete" builder
+	  (void_t, L.build_call delete_func [| (snd (expr map builder e)) |] "delete" builder)
       | A.FuncCall ("rmdir", [e]) ->
-	  L.build_call rmdir_func [| (expr map builder e) |] "rmdir" builder
+	  (void_t, L.build_call rmdir_func [| (snd (expr map builder e)) |] "rmdir" builder)
       | A.FuncCall ("copy", [e1 ; e2]) ->
-                      L.build_call copy_func [| (expr map builder e1) ; (expr map builder e2)|] "copy" builder
+                      (void_t, L.build_call copy_func [| (snd (expr map builder e1)) ; (snd (expr map builder e2))|] "copy" builder)
       | A.FuncCall ("write", [e1 ; e2]) ->
-                      L.build_call write_func [| (expr map builder e1) ; (expr map builder e2)|] "write" builder
+                      (void_t, L.build_call write_func [| (snd (expr map builder e1)) ; (snd (expr map builder e2))|] "write" builder)
       | A.FuncCall ("appendString", [e1 ; e2]) ->
-                      L.build_call appendstr_func [| (expr map builder e1) ; (expr map builder e2)|] "appendString" builder
+                      (void_t, L.build_call appendstr_func [| (snd (expr map builder e1)) ; (snd (expr map builder e2))|] "appendString" builder)
       | A.FuncCall ("read", [e1 ; e2]) ->
-                      L.build_call read_func [| (expr map builder e1) ; (expr map builder e2)|] "read" builder
+                      (void_t, L.build_call read_func [| (snd (expr map builder e1)) ; (snd (expr map builder e2))|] "read" builder)
       | A.FuncCall ("readLine", [e1]) ->
-                      L.build_call readline_func [| (expr map builder e1) |] "readLine" builder
+                      (void_t, L.build_call readline_func [| (snd (expr map builder e1)) |] "readLine" builder)
       | A.FuncCall ("move", [e1 ; e2]) ->
-                      L.build_call move_func [| (expr map builder e1) ; (expr map builder e2)|] "move" builder
+                      (void_t, L.build_call move_func [| (snd (expr map builder e1)) ; (snd (expr map builder e2))|] "move" builder)
       | A.FuncCall ("prints", [e]) -> 
-              L.build_call printf_func [| str_format_str; 
-              (expr map builder e) |] "printf" builder
+              (void_t, L.build_call printf_func [| str_format_str; 
+              (snd (expr map builder e)) |] "printf" builder)
       | A.Binop (e1, op, e2) -> 
-	  let e1' = expr map builder e1
-	  and e2' = expr map builder e2 in
+	  let e1' = (expr map builder e1)
+	  and e2' = (expr map builder e2) in
 	  (match op with
-	    A.Add     -> L.build_add
-	  | A.Sub     -> L.build_sub
-	  | A.Mul    -> L.build_mul
-          | A.Div     -> L.build_sdiv
-	  | A.And     -> L.build_and
-	  | A.Or      -> L.build_or
-	  | A.Eq   -> L.build_icmp L.Icmp.Eq
-	  | A.Neq     -> L.build_icmp L.Icmp.Ne
-	  | A.Lt    -> L.build_icmp L.Icmp.Slt
-	  | A.Gt -> L.build_icmp L.Icmp.Sgt
-          | A.Pipe -> raise (Failure ("not implemented yet"))
-	  ) e1' e2' "tmp" builder
+            A.Pipe -> 
+                    let len1 = L.array_length (fst e1') in
+                    let len2 = L.array_length (fst e2') in
+                    (void_t, L.build_call (pipeop_func len1 len2) [| (snd e1') ; (snd e2') |] "pipeop" builder) 
+          | binop -> (void_t, (match binop with
+                    A.Add     -> L.build_add
+                  | A.Sub     -> L.build_sub
+                  | A.Mul    -> L.build_mul
+                  | A.Div     -> L.build_sdiv
+                  | A.And     -> L.build_and
+                  | A.Or      -> L.build_or
+                  | A.Eq   -> L.build_icmp L.Icmp.Eq
+                  | A.Neq     -> L.build_icmp L.Icmp.Ne
+                  | A.Lt    -> L.build_icmp L.Icmp.Slt
+                  | A.Gt -> L.build_icmp L.Icmp.Sgt
+                  ) (snd e1') (snd e2') "tmp" builder)
+          )
       | A.Uop (op, e) -> 
-                let e' = expr map builder e in
+                let e' = (snd (expr map builder e)) in
+                (void_t, 
                 (match op with
                   A.Neg -> L.build_neg
-                | A.Not -> L.build_not) e' "tmp" builder
+                | A.Not -> L.build_not) e' "tmp" builder)
       | A.StringLit s -> 
-              L.build_global_stringptr s "strptr" builder
-      | A.Id s -> L.build_load (lookup s map) s builder 
+              (void_t, L.build_global_stringptr s "strptr" builder)
+      | A.Id s -> (fst (lookup s map), L.build_load (snd (lookup s map)) s builder)
       | A.FuncCall(f, args) -> 
                 let (fdef, fdecl) = StringMap.find f function_decls in
-                let actuals = List.rev (List.map (expr map builder) (List.rev args)) in
+                let actuals = List.rev (List.map snd (List.map (expr map builder) (List.rev args))) in
                 let result = (match fdecl.A.typ with
                   A.Void -> ""
                   | _ -> f ^ "_result") in
-                L.build_call fdef (Array.of_list actuals) result builder
+                (void_t, L.build_call fdef (Array.of_list actuals) result builder)
       | A.ArrAccess (_, _) -> raise (Failure ("not implemented yet"))
-      | A.ArrLit el -> L.const_array str_ptr_t  (Array.of_list (List.map (expr map builder) (List.rev el)))
+      | A.ArrLit el -> (void_t, L.const_array str_ptr_t  (Array.of_list (List.map snd (List.map (expr map builder) (List.rev el)))))
     in
 
     (* Build the code for the given statement; return the StringMap and builder 
        for the statement's successor *)
     let rec stmt mb = function
         A.Block sl -> (List.fold_left stmt mb sl)
-      | A.Expr e -> ignore (expr (fst mb) (snd mb) e); mb
+      | A.Expr e -> ignore (snd (expr (fst mb) (snd mb) e)); mb
       | A.Nostmt -> mb 
       | A.For (s1, e, s2, body) -> 
                 (* Construct for basic block *)
@@ -335,7 +344,7 @@ let translate program =
 
                 (* Do initialization before checking the predicate e *)
                 let pred_builder = L.builder_at_end context pred_bb in
-                let bool_val = expr (fst init) pred_builder e in
+                let bool_val = (snd (expr (fst init) pred_builder e)) in
 
                 (* Construct merge basic block *)
                 let merge_bb = L.append_block context "merge" main_func in
@@ -343,7 +352,7 @@ let translate program =
                 (fst mb, L.builder_at_end context merge_bb)
       | A.Foreach (_, _, _) -> raise (Failure ("not implemented yet"))
       | A.If (p, then_stmt, else_stmt) -> 
-         let bool_val = expr (fst mb) builder p in
+         let bool_val = (snd (expr (fst mb) builder p)) in
 	 let merge_bb = L.append_block context "merge" main_func in
 
 	 let then_bb = L.append_block context "then" main_func in
@@ -360,30 +369,30 @@ let translate program =
       | A.Return _ -> raise (Failure ("returns are not allowed in main"))
       | A.VarDecl (t, n) -> let init = 
               (match t with
-                  A.Int -> L.build_alloca i32_t n (snd mb) 
-                | A.String -> L.build_alloca str_ptr_t n (snd mb)
-                | A.File -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Void -> L.build_ret_void (snd mb)
+                  A.Int -> (i32_t, L.build_alloca i32_t n (snd mb))
+                | A.String -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
+                | A.File -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
+                | A.Dir -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
+                | A.Proc s -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
+                | A.Array (_, s) -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
+                | A.Void -> (void_t, L.build_ret_void (snd mb))
               ) in
               ((StringMap.add n init (fst mb)), snd mb)
       | A.VarDeclAsn (t, n, e) -> let init = 
               (match t with
-                  A.Int -> L.build_alloca i32_t n (snd mb) 
-                | A.String -> L.build_alloca str_ptr_t n (snd mb)
-                | A.File -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Dir -> L.build_alloca str_ptr_t n (snd mb)
-                | A.Proc s -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Array (_, s) -> L.build_alloca (str_arr_ptr_t s) n (snd mb) 
-                | A.Void -> L.build_ret_void (snd mb)
+                  A.Int -> (i32_t, L.build_alloca i32_t n (snd mb))
+                | A.String -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
+                | A.File -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
+                | A.Dir -> (str_ptr_t, L.build_alloca str_ptr_t n (snd mb))
+                | A.Proc s -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
+                | A.Array (_, s) -> (str_arr_ptr_t s, L.build_alloca (str_arr_ptr_t s) n (snd mb))
+                | A.Void -> (void_t, L.build_ret_void (snd mb))
               ) in
               let m = (StringMap.add n init (fst mb)) in
-              let e' = expr (m) (snd mb) e in
-              ignore(L.build_store e' (lookup n (m)) (snd mb)) ; (m, (snd mb))
-      | A.Asn (s, e) -> let e' = expr (fst mb) (snd mb) e in
-        ignore(L.build_store e' (lookup s (fst mb)) (snd mb)) ; mb
+              let e' = (snd (expr (m) (snd mb) e)) in
+              ignore(L.build_store e' (snd (lookup n (m))) (snd mb)) ; (m, (snd mb))
+      | A.Asn (s, e) -> let e' = (snd (expr (fst mb) (snd mb) e)) in
+        ignore(L.build_store e' (snd (lookup s (fst mb))) (snd mb)) ; mb
     in
 
     (* Build the code for each statement in the function *)

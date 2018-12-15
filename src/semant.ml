@@ -48,7 +48,8 @@ let check ast =
                 body = []} (StringMap.add "appendString" { typ = Int; fname = "readLine"; params = [(String, "f") ; (String, "buf")];
                 body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
                 body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
-                body = []} StringMap.empty)))))))))))
+                body = []} (StringMap.add "pipeop" { typ = Void; fname = "pipeop"; params = [(Proc 5, "p1") ; (Proc 5, "p2")];
+                body = []} StringMap.empty))))))))))))
         in
      
         (* Keep track of function declarations *)
@@ -71,7 +72,12 @@ let check ast =
                   IntLit _ -> Int
                 | StringLit _ -> String
                 | ArrLit a -> Array(expr map (List.hd a), List.length a)
-                | Id s -> type_of_identifier s map
+                | Id s -> let t = type_of_identifier s map in 
+                        (match t with 
+                          Proc x -> Proc 5
+                        | y -> y
+                        )
+
                 | Noexpr -> Void
                 | Uop(op, e) as ex -> let t = expr map e in
                         (match op with
@@ -96,7 +102,7 @@ let check ast =
                         | Eq | Neq when t1 = t2 -> Int
                         | Lt | Gt when t1 = Int && t2 = Int -> Int
                         | And | Or when t1 = Int && t2 = Int -> Int
-                        | Pipe when t1 = File && t2 = File -> File 
+                        | Pipe when t1 = Proc(5) && t2 = Proc(5) -> Proc (5)
                         | _ -> raise (Failure ("illegal binary operator " ^ 
                                 string_of_typ t1 ^ " " ^ string_of_op op ^
                                 " " ^ string_of_typ t2 ^ " in " ^ string_of_expr e))
