@@ -1,3 +1,7 @@
+(* 
+ * semant.ml
+ * Author: Matthew Chan
+ *)
 open Ast
 
 module StringMap = Map.Make (String)
@@ -108,7 +112,7 @@ let check ast =
                 else ()
         in
 
-        (**** Check Statements ****)
+        (**** Check Global Scope ****)
         let check_stmt s =
 
                 (* Type of each variable (global, formal, or local *)
@@ -135,12 +139,12 @@ let check ast =
                                 ignore(expr m e); ignore(stmt (stmt m s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                in ignore(stmt symbols (Block s))
+                in stmt symbols (Block s)
 
         in
         
         (**** Check Functions ****)
-        let check_function func =
+        let check_function global_map func =
 
                 (* Params cannot have void type *)
                 List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
@@ -152,7 +156,7 @@ let check ast =
 
                 (* Type of each variable (global, formal, or local *)
                 let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-                StringMap.empty (func.params)
+                global_map (func.params)
                 in
 
                 (* Verify a statement or throw an exception *)
@@ -180,4 +184,4 @@ let check ast =
 
                 in ignore(stmt symbols (Block func.body))
 
-        in List.iter check_function ast.funcs ; check_stmt ast.stmts
+        in List.iter (check_function (check_stmt ast.stmts)) ast.funcs

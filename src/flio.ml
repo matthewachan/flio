@@ -1,3 +1,7 @@
+(*
+ * flio.ml
+ * Author: Matthew Chan
+ *)
 type action = Ast | LLVM_IR | Compile
 
 let () =

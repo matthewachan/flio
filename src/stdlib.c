@@ -1,3 +1,7 @@
+/* 
+ * stdlib.c
+ * Author: Matthew Chan
+ */
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/wait.h>
