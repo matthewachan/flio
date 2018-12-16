@@ -1,1 +1,2 @@
 def myfunc() {}
+def myfunc() {}

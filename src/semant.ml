@@ -1,3 +1,7 @@
+(* 
+ * semant.ml
+ * Author: Matthew Chan
+ *)
 open Ast
 
 module StringMap = Map.Make (String)
@@ -37,12 +41,24 @@ let check ast =
 
         let built_in_decls =  StringMap.add "print"
                 { typ = Void; fname = "print"; params = [(Int, "x")];
-                body = [] } 
+                body = [] } (StringMap.add "prints" { typ = Void; fname = "prints"; params = [(String, "x")];
+                body = []} (StringMap.add "fopen" { typ = File; fname = "fopen"; params = [(String, "f")];
+                body = []} (StringMap.add "delete" { typ = Int; fname = "delete"; params = [(String, "x")];
+                body = []} (StringMap.add "copy" { typ = Int; fname = "copy"; params = [(String, "src") ; (String, "dest")];
+                body = []} (StringMap.add "move" { typ = Int; fname = "move"; params = [(String, "src") ; (String, "dest")];
+                body = []} (StringMap.add "write" { typ = Int; fname = "write"; params = [(File, "f") ; (String, "buf")];
+                body = []} (StringMap.add "read" { typ = String; fname = "read"; params = [(File, "f") ; (Int, "length")];
+                body = []} (StringMap.add "readLine" { typ = String; fname = "readLine"; params = [(File, "f")];
+                body = []} (StringMap.add "appendString" { typ = Int; fname = "readLine"; params = [(String, "f") ; (String, "buf")];
+                body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
+                body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
+                body = []} (StringMap.add "concat" { typ = String; fname = "rmdir"; params = [(String, "s1") ; (String, "s2")];
+                body = []} StringMap.empty))))))))))))
         in
      
         (* Keep track of function declarations *)
         let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-        built_in_decls ast.funcs 
+        built_in_decls ast.funcs
         in
 
         let function_decl s = try StringMap.find s function_decls
@@ -59,8 +75,7 @@ let check ast =
         let rec expr map = function
                   IntLit _ -> Int
                 | StringLit _ -> String
-                | ArrLit a -> Array(expr map (List.hd a), List.length a)
-                | Id s -> type_of_identifier s map
+                | Id s -> let t = type_of_identifier s map in t
                 | Noexpr -> Void
                 | Uop(op, e) as ex -> let t = expr map e in
                         (match op with
@@ -69,7 +84,6 @@ let check ast =
                         | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex))
                         )
-                | ArrAccess(n, _) -> type_of_identifier n map
                 | FuncCall(f, args) as call -> let fd = function_decl f in 
                         if List.length args != List.length fd.params then
                                 raise (Failure ("expecting " ^ string_of_int
@@ -85,7 +99,6 @@ let check ast =
                         | Eq | Neq when t1 = t2 -> Int
                         | Lt | Gt when t1 = Int && t2 = Int -> Int
                         | And | Or when t1 = Int && t2 = Int -> Int
-                        | Pipe when t1 = File && t2 = File -> File 
                         | _ -> raise (Failure ("illegal binary operator " ^ 
                                 string_of_typ t1 ^ " " ^ string_of_op op ^
                                 " " ^ string_of_typ t2 ^ " in " ^ string_of_expr e))
@@ -99,7 +112,7 @@ let check ast =
                 else ()
         in
 
-        (**** Check Statements ****)
+        (**** Check Global Scope ****)
         let check_stmt s =
 
                 (* Type of each variable (global, formal, or local *)
@@ -122,18 +135,16 @@ let check ast =
                                 " = " ^ string_of_typ rt ^ " in " ^ string_of_stmt ex))) ; map
                         | Expr e -> ignore(expr map e) ; map
                         | Return e -> ignore(expr map e) ; raise (Failure ("returns not allowed outside of function scope"))
-                        | For(s1, e, s2, s3) -> ignore(expr map e); ignore(stmt (stmt (stmt map s1) s2) s3) ; map
+                        | For(s1, e, s2, s3) -> let m = stmt map s1 in
+                                ignore(expr m e); ignore(stmt (stmt m s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                        | Foreach(_, e, s) -> ignore(expr map e); ignore(stmt map s); map
-                        | Elif(exprs, stmts) -> let check_e e = ignore(expr map e) and check_s s = ignore(stmt map s) in
-                                List.iter check_e exprs; List.iter check_s stmts; map
-                in ignore(stmt symbols (Block s))
+                in stmt symbols (Block s)
 
         in
         
         (**** Check Functions ****)
-        let check_function func =
+        let check_function global_map func =
 
                 (* Params cannot have void type *)
                 List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
@@ -145,7 +156,7 @@ let check ast =
 
                 (* Type of each variable (global, formal, or local *)
                 let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-                StringMap.empty (func.params)
+                global_map (func.params)
                 in
 
                 (* Verify a statement or throw an exception *)
@@ -170,10 +181,7 @@ let check ast =
                         | For(s1, e, s2, s3) -> ignore(expr map e); ignore(stmt (stmt (stmt map s1) s2) s3) ; map
                         | If(e, s1, s2) -> check_bool_expr map e; ignore(stmt map s1); ignore(stmt map s2); map 
                         | Nostmt -> map
-                        | Foreach(e1, e2, s) -> ignore(expr map e1); ignore(expr map e2); ignore(stmt map s); map
-                        | Elif(exprs, stmts) -> let check_e e = ignore(expr map e) and check_s s = ignore(stmt map s) in
-                List.iter check_e exprs; List.iter check_s stmts; map
 
                 in ignore(stmt symbols (Block func.body))
 
-        in List.iter check_function ast.funcs ; check_stmt ast.stmts
+        in List.iter (check_function (check_stmt ast.stmts)) ast.funcs

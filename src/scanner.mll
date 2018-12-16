@@ -17,13 +17,10 @@ rule token = parse
 | "return"	{ RETURN }
 (* Loops and conditionals *)
 | "for"		{ FOR }
-| "foreach"	{ FOREACH }
 | "in"		{ IN }
 | "if"		{ IF }
-| "elif"	{ ELIF }
 | "else"	{ ELSE }
 (* Misc *)
-| "import"	{ IMPORT }
 | "//"		{ comment lexbuf }
 | '('		{ LPAREN }
 | ')'		{ RPAREN }
@@ -34,12 +31,10 @@ rule token = parse
 | ','		{ COMMA }
 | ';'		{ SEQUENCING } 
 (* Operators *)
-| '.'		{ DOT }
 | '+'		{ PLUS }
 | '-'		{ MINUS }
 | '*'		{ TIMES }
 | '/'		{ DIVIDE }
-| "|>"		{ PIPE }
 | '>'		{ GT }
 | '<'		{ LT }
 | "=="		{ EQ }

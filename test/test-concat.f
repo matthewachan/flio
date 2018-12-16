@@ -1,0 +1,1 @@
+prints(concat('hello', 'world'));

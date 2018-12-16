@@ -1,16 +1,21 @@
+$CC = gcc
+
 .PHONY : all
-all : flio.native
+all : clean flio.native
 
 .PHONY : flio.native
 flio.native :
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		flio.native
+	$(CC) -c stdlib.c
+
 .PHONY: clean
 clean:
 	ocamlbuild -clean
 	rm -rf scanner.ml parser.ml parser.mlii flio
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf testall.log *.diff *.err *.ll
+	rm -rf *.exe *s *.out
 
 TESTS = decl hello hello2 number loop
 
