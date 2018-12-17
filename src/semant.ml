@@ -53,7 +53,10 @@ let check ast =
                 body = []} (StringMap.add "dopen" { typ = Dir; fname = "dopen"; params = [(String, "d")];
                 body = []} (StringMap.add "rmdir" { typ = Int; fname = "rmdir"; params = [(String, "d")];
                 body = []} (StringMap.add "concat" { typ = String; fname = "rmdir"; params = [(String, "s1") ; (String, "s2")];
-                body = []} StringMap.empty))))))))))))
+                body = []} (StringMap.add "strcmp" { typ = Int; fname = "strcmp"; params = [(String, "s1") ; (String, "s2")];
+                body = []} (StringMap.add "intToStr" { typ = String; fname = "intToStr"; params = [(Int, "i")];
+                body = []} (StringMap.add "create" { typ = Int; fname = "create"; params = [(String, "filename")];
+                body = []} StringMap.empty)))))))))))))))
         in
      
         (* Keep track of function declarations *)

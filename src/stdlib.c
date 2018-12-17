@@ -33,6 +33,28 @@ int copy(char *src, char *dest)
 	return -1;
 }
 
+int create(char *filename)
+{
+	int status;
+	pid_t pid = fork();
+	/* Child proc */
+	if (pid == 0) {
+		char *const args[] = {"/bin/touch", filename, NULL};
+		/* Syscall interrupt */ 
+		execv("/bin/touch", args);
+
+		/* Child should not reach this point */
+		fprintf(stderr, "error: %s\n", strerror(errno));
+		exit(1);
+	}
+	/* Parent proc */
+	else {
+		wait(&status);
+		return WEXITSTATUS(status);
+	}
+	return -1;
+}
+
 int move(char *src, char *dest)
 {
 	int status;
@@ -57,8 +79,9 @@ int move(char *src, char *dest)
 
 ssize_t bwrite(FILE *f, const char *buf)
 {
-	int fd = fileno(f);
-	return write(fd, buf, strlen(buf));
+	/* int fd = fileno(f); */
+	/* return write(fd, buf, strlen(buf)); */
+	return fputs(buf, f);
 }
 
 char *bread(FILE *f, size_t count)
@@ -70,14 +93,15 @@ char *bread(FILE *f, size_t count)
 
 char *readLine(FILE *f)
 {
-	return bread(f, 200);	
+	return bread(f, 1000);	
 }
 
 int appendString(const char *f, const char *buf)
 {
 	
 	FILE *file = fopen(f, "a");
-	int ret = bwrite(file, buf);
+	int fd = fileno(file);
+	int ret = write(fd, buf, strlen(buf));
 	fclose(file);
 	return ret;
 }
@@ -88,6 +112,13 @@ char *concat(const char *s1, const char *s2)
 	strcpy(c, s1);
 	strcat(c, s2);
 	return c;
+}
+
+char *intToStr(int value)
+{
+	char *buf = malloc(sizeof(char) * 10);
+	sprintf(buf, "%d", value);
+	return buf;
 }
 
 #ifdef DEBUG

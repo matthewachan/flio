@@ -44,7 +44,16 @@ let translate program =
 
   let concat_t = L.function_type (L.pointer_type i8_t) [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
   let concat_func = L.declare_function "concat" concat_t the_module in
+
+  let intToStr_t = L.function_type (L.pointer_type i8_t) [| i32_t |] in
+  let intToStr_func = L.declare_function "intToStr" intToStr_t the_module in
+
+  let strcmp_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in
+  let strcmp_func = L.declare_function "strcmp" strcmp_t the_module in
   
+  let create_t = L.function_type i32_t [| L.pointer_type i8_t |] in
+  let create_func = L.declare_function "create" create_t the_module in
+
   let fopen_t = L.var_arg_function_type (L.pointer_type i8_t) [| L.pointer_type i8_t |] in
   let fopen_func = L.declare_function "fopen" fopen_t the_module in
 
@@ -100,6 +109,15 @@ let translate program =
       | A.FuncCall ("concat", [s1 ; s2]) -> 
               L.build_call concat_func [| (expr map builder s1) ; 
               (expr map builder s2) |] "concat" builder
+      | A.FuncCall ("create", [f]) -> 
+              L.build_call create_func [| (expr map builder f) |]
+              "create" builder
+      | A.FuncCall ("intToStr", [e]) -> 
+              L.build_call intToStr_func [| (expr map builder e) |] 
+              "intToStr" builder
+      | A.FuncCall ("strcmp", [s1 ; s2]) -> 
+              L.build_call strcmp_func [| (expr map builder s1) ; 
+              (expr map builder s2) |] "strcmp" builder
       | A.FuncCall ("fopen", [e]) ->
                      L.build_call fopen_func [| (expr map builder e) ; (fopen_mode builder)|] "fopen" builder
       | A.FuncCall ("dopen", [e]) ->
