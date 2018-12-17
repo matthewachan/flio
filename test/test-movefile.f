@@ -1,6 +1,6 @@
 string filename = 'myfile.txt';
+create(filename);
 string newname = 'renamedfile.txt';
-file f = filename;
 
 move(filename, newname);
 

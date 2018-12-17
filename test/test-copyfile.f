@@ -1,6 +1,7 @@
 string filename = 'myfile.txt';
+create(filename);
 string copyname = 'copyfile.txt';
-file f = filename;
+file f = fopen(filename);
 
 copy(filename, copyname);
 

@@ -1,5 +1,6 @@
 string filename = 'myfile.txt';
-file f = filename;
+create(filename);
+file f = fopen(filename);
 
 appendString(filename, 'hola mundo!');
 prints(readLine(f));
