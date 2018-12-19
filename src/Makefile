@@ -15,16 +15,21 @@ clean:
 	rm -rf scanner.ml parser.ml parser.mlii flio
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf testall.log *.diff *.err *.ll
-	rm -rf *.exe *s *.out
+	rm -rf *.exe *s *.out flio.tar.gz
 
-TESTS = decl hello hello2 number loop
+TESTS = binop concat copyfile createfile decl2 fcall fcall2 fdecl fdecl2 \
+	for hello hello2 if logic movefile number readfile rmdir string void
 
-FAILS = assign
+FAILS = assign fdecl fdecl2 fdecl3 for hello if return scope types
 
 TESTFILES = $(TESTS:%=test-%.f) $(FAILS:%=fail-%.f)
 
-TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml \
-	   testall.sh codegen.ml flio.ml $(TESTFILES:%=test_suite/%) 
+SOURCEFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml \
+	      testall.sh codegen.ml flio.ml 
+
+DEMOFILES = rundemo.sh sample.txt demo.f
+
+TARFILES = ../README.md $(SOURCEFILES) $(TESTFILES:%=../test/%) $(DEMOFILES:%=../demo/%) 
 
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx flio.cmx
 
