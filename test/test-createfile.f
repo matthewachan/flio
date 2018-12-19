@@ -1,3 +1,5 @@
+// test-createfile.f
+// Author: Matthew Chan
 string filename = 'myfile.txt';
 file f = filename;
 
