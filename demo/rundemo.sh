@@ -1,3 +1,5 @@
+# demo.f
+# Author: Matthew Chan
 # Build the project
 cd ../src
 make

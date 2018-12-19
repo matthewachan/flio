@@ -1,3 +1,5 @@
+// test-decl2.f
+// Author: Matthew Chan
 string s = 'hello';
 prints(s);
 

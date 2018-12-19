@@ -1,3 +1,5 @@
+// test-logic.f
+// Author: Matthew Chan
 def go_outside(int dow, string weather) int
 {
       if (dow == 5 or dow == 6 and strcmp(weather, 'horrible') != 0)

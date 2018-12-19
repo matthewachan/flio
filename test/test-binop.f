@@ -1,3 +1,5 @@
+// fail-binop.f
+// Author: Matthew Chan
 int a = 10;
 int b = 50;
 

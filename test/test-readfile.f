@@ -1,3 +1,5 @@
+// test-readfile.f
+// Author: Matthew Chan
 string filename = 'myfile.txt';
 create(filename);
 file f = fopen(filename);
