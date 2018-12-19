@@ -10,10 +10,6 @@ cd -
 ../src/flio.native < demo.f > demo.ll
 llc demo.ll
 clang demo.s ../src/stdlib.c -o demo
-<<<<<<< HEAD
 ./demo
 
 rm demo.ll demo.s demo
-=======
-./demo
->>>>>>> master
