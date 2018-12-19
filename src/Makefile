@@ -27,7 +27,7 @@ FAILS = assign fdecl fdecl2 fdecl3 for hello if return scope types
 TESTFILES = $(TESTS:%=test-%.f) $(FAILS:%=fail-%.f)
 
 SOURCEFILES = Makefile scanner.mll parser.mly ast.ml sast.ml semant.ml \
-	      testall.sh codegen.ml flio.ml 
+	      testall.sh codegen.ml flio.ml stdlib.c
 
 DEMOFILES = rundemo.sh sample.txt demo.f
 
