@@ -1,3 +1,5 @@
+# Makefile
+# Author: Matthew Chan
 $CC = gcc
 
 .PHONY : all

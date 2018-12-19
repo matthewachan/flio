@@ -1,7 +1,10 @@
 
 #!/bin/sh
+#  testall.sh
+#  Author: Matthew Chan
+#  Inspiration: MicroC
 
-#  MicroC Regression testing script
+#  Fli/o regression testing script
 #  executes then checks the errors of all tests expected to fail
 
 # LLVM interpreter path
