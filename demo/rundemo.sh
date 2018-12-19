@@ -1,3 +1,5 @@
+# demo.f
+# Author: Matthew Chan
 # Build the project
 cd ../src
 make
@@ -9,3 +11,5 @@ cd -
 llc demo.ll
 clang demo.s ../src/stdlib.c -o demo
 ./demo
+
+rm demo.ll demo.s demo

@@ -1,5 +1,20 @@
-# flio
-Fli-O was developed to create a seamless way for users to interact with files, especially large documents that require file or directory manipulation. 
+# Fli/o
+A programming language developed to create a seamless way for users to interact with files.
 
-# Hello World
-To test our hello world program, please build our project using `make` in the /src directory. The hello world program is src/test\_suite/test-hello.f. The program can be converted into LLVM IR using the command `./flio.native -c ../test\_suite/test_hello.c` while in the src directory. To run all tests, run `bash testall.sh`.
+# Installation
+
+## Prerequisites
+
+LLVM, OCaml and cc are required to build the compiler for Fli/o.
+
+## Steps
+
+Run `make` in the /src directory. Then, to compile a program named `myprogram.f`, run `flio.native < myprogram.f > myprogram.s` to build the LLVM IR.
+
+Then run `llc myprogram.ll` to build the Assembly code. Finally, run `clang myprogram.s stdlib.c -o myprogram` to link the Assembly code with Fli/o standard library and create an executable named `myprogram`.
+
+Note, you can use other C compilers instead of clang here. (Ex: gcc, cc)
+
+# Testing
+
+To run all tests, run `bash testall.sh`.

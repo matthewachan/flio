@@ -1,3 +1,5 @@
+// fail-if.f
+// Author: Matthew Chan
 int a = 5;
 
 else {

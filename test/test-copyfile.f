@@ -1,3 +1,5 @@
+// test-copyfile.f
+// Author: Matthew Chan
 string filename = 'myfile.txt';
 create(filename);
 string copyname = 'copyfile.txt';
