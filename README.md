@@ -5,6 +5,8 @@ The idea behind Fli/o is to simplify the process of working with files-- this in
 
 Most of this functionality is offered through the standard library of built-in functions included in this project.
 
+**NOTE**: The language reference manual for Fli/o can be found [here](http://www.cs.columbia.edu/~sedwards/classes/2018/4115-fall/lrms/Fli-O.pdf).
+
 Features:
 - Primitive data types (e.g. int, char, string)
 - For loops, if/else statements
